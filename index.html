@@ -1,841 +1,362 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EzParkk — Peer‑to‑Peer Parking Marketplace</title>
-  <meta name="description" content="EzParkk is a peer‑to‑peer parking marketplace. Drivers find hourly spots in minutes. Hosts rent their driveways or unused spaces to earn money." />
-  <meta name="theme-color" content="#111827" />
-  <meta property="og:title" content="EzParkk — Peer‑to‑Peer Parking Marketplace" />
-  <meta property="og:description" content="Find hourly parking in minutes. Rent your spot in seconds." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'%3E%3Crect width='100%25' height='100%25' fill='%23111827'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2384cc16' font-family='system-ui,Segoe UI,Roboto' font-size='72'%3EEzParkk%3C/text%3E%3C/svg%3E" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect rx='18' width='100' height='100' fill='%23111827'/%3E%3Cpath d='M25 70 L50 20 L75 70 Z' fill='%2384cc16'/%3E%3Ccircle cx='50' cy='68' r='10' fill='%230ea5e9'/%3E%3C/svg%3E" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EzParkk — Rent & Host Parking By The Hour</title>
+  <meta name="description" content="Peer-to-peer hourly parking. Rent safe spots from locals or host your unused spot. Launching soon — join as an early user or host: contact@ezparkk.com" />
 
-  <!-- Tailwind CSS (Open Source): https://github.com/tailwindlabs/tailwindcss -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN (fast prototyping) -->
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#f7fee7', 100: '#ecfccb', 200: '#d9f99d', 300: '#bef264', 400: '#a3e635', 500: '#84cc16', 600: '#65a30d', 700: '#4d7c0f', 800: '#3f6212', 900: '#365314'
-            },
-            accent: {
-              500: '#0ea5e9'
-            }
-          },
-          boxShadow: {
-            float: '0 10px 30px rgba(0,0,0,0.15)'
-          }
-        }
-      }
-    }
+    tailwind = { config: { theme: { extend: { colors: { ezGreen: '#00B894', ezDark: '#0F172A' } } } } }
   </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- AOS — Animate on Scroll (MIT): https://github.com/michalsnik/aos -->
-  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+  <!-- AOS (Animate on scroll) -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-  <!-- Swiper (MIT): https://github.com/nolimits4web/swiper -->
-  <link rel="stylesheet" href="https://unpkg.com/swiper@9/swiper-bundle.min.css" />
+  <!-- Alpine.js for tiny SPA behavior -->
+  <script defer src="https://unpkg.com/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
-  <!-- Leaflet (BSD-2): https://github.com/Leaflet/Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <!-- Lottie player (optional for later) -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@1.5.7/dist/lottie-player.js"></script>
 
   <style>
-    html { scroll-behavior: smooth; }
-    .glass { backdrop-filter: blur(12px); background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06)); border: 1px solid rgba(255,255,255,0.15); }
-    .gradient-mesh { background: radial-gradient(1200px 600px at 10% 10%, rgba(132,204,22,0.18), transparent 60%), radial-gradient(600px 600px at 90% 10%, rgba(14,165,233,0.18), transparent 60%), radial-gradient(1000px 600px at 50% 120%, rgba(132,204,22,0.12), transparent 60%), #0b1220; }
-    .nav-link { position: relative; }
-    .nav-link:after { content:""; position:absolute; left:0; bottom:-6px; width:0; height:2px; background:#84cc16; transition:width .25s ease; }
-    .nav-link:hover:after { width:100%; }
-    .route { display: none; }
-    .route.active { display: block; }
-    /* Leaflet height */
-    #map { height: 380px; border-radius: 1rem; overflow: hidden; }
-    /* Hide map attribution on small screens but keep accessible */
-    .leaflet-control-attribution { font-size: 10px; }
-    /* Simple keyframe for subtle float */
-    @keyframes float { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
+    html,body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+    /* subtle floating blobs */
+    .blob { position: absolute; filter: blur(38px); opacity: .14; transform: translateZ(0); }
+
+    /* small decorative animated car */
+    .car-path { offset-path: path('M10 120 C 160 20, 320 220, 480 120'); offset-rotate: 0deg; }
+    .car { offset-distance: 0%; animation: drive 6s linear infinite; }
+    @keyframes drive { 0%{offset-distance:0%} 100%{offset-distance:100%} }
+
+    /* simple modal backdrop */
+    .backdrop { background: rgba(2,6,23,0.6); backdrop-filter: blur(3px); }
+
+    /* Tiny focus ring */
+    .focus-ring:focus { outline: 3px solid rgba(0,184,148,.18); outline-offset: 2px; }
   </style>
 </head>
-<body class="min-h-screen text-slate-100 bg-slate-950 selection:bg-brand-400 selection:text-slate-900">
-  <!--
-    Open‑source toolkit used (all permissive licenses):
-    - Tailwind CSS (Tailwind Labs)
-    - AOS Animate On Scroll (michalsnik)
-    - Swiper (nolimits4web)
-    - Leaflet (Leaflet)
-    - Feather Icons (feathericons)
-    - Typed.js (mattboldt)
-    - CountUp.js (inorganik)
-    - QRCode.js (davidshimjs)
-    - GSAP + ScrollTrigger (greensock)
-    - three.js + Vanta.js Waves background (tengbao)
-    - Lottie-web (airbnb)
-  -->
+<body class="antialiased text-slate-800 bg-gradient-to-b from-white via-slate-50 to-white min-h-screen">
 
-  <!-- NAVBAR -->
-  <header class="fixed top-0 inset-x-0 z-50">
-    <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mt-4 flex items-center justify-between rounded-2xl px-4 py-3 glass shadow-float">
-        <a href="#home" class="flex items-center gap-3">
-          <svg width="36" height="36" viewBox="0 0 100 100" class="rounded-2xl" aria-hidden="true">
-            <rect rx="20" width="100" height="100" fill="#111827" />
-            <path d="M25 70 L50 20 L75 70 Z" fill="#84cc16" />
-            <circle cx="50" cy="68" r="10" fill="#0ea5e9" />
-          </svg>
-          <span class="font-semibold text-xl tracking-tight">EzParkk</span>
-        </a>
+<!-- SPA root -->
+<div x-data="landingApp()" x-init="init()" class="min-h-screen relative overflow-x-hidden">
 
-        <div class="hidden md:flex items-center gap-8">
-          <a href="#home" class="nav-link text-slate-200 hover:text-white">Home</a>
-          <a href="#about" class="nav-link text-slate-200 hover:text-white">About</a>
-          <a href="#contact" class="nav-link text-slate-200 hover:text-white">Contact</a>
-        </div>
+  <!-- floating shapes -->
+  <div aria-hidden class="blob left-0 top-10 w-72 h-72 bg-emerald-400 rounded-full mix-blend-screen opacity-20 -z-10" style="left:-8%;transform:translateY(-10%);"></div>
+  <div aria-hidden class="blob right-0 top-40 w-96 h-96 bg-emerald-300 rounded-full mix-blend-screen opacity-14 -z-10" style="right:-6%;transform:translateY(4%);"></div>
 
-        <div class="hidden md:flex items-center gap-3">
-          <button id="openHost" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700">Become a Host</button>
-          <a href="#download" class="px-4 py-2 rounded-xl bg-brand-500 text-slate-900 font-semibold hover:brightness-110">Get the App</a>
-        </div>
+  <!-- Header -->
+  <header class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Logo / wordmark -->
+      <a href="#" @click.prevent="go('home')" class="flex items-center gap-3 no-underline">
+        <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+          <rect width="48" height="48" rx="12" fill="#ECFDF5" />
+          <path d="M24 12c4.97 0 9 4.03 9 9s-9 15-9 15-9-10.03-9-15 4.03-9 9-9z" fill="#00B894"/>
+          <circle cx="24" cy="21" r="2.5" fill="white" />
+        </svg>
+        <span class="text-xl font-semibold text-emerald-700">EzParkk</span>
+      </a>
+    </div>
 
-        <button id="menuBtn" class="md:hidden inline-flex items-center justify-center rounded-xl p-2 hover:bg-slate-800" aria-label="Open menu">
-          <i data-feather="menu"></i>
-        </button>
-      </div>
-
-      <!-- Mobile menu -->
-      <div id="mobileMenu" class="md:hidden mt-2 hidden rounded-2xl glass p-4">
-        <a href="#home" class="block py-2">Home</a>
-        <a href="#about" class="block py-2">About</a>
-        <a href="#contact" class="block py-2">Contact</a>
-        <div class="pt-2 flex gap-2">
-          <button id="openHostMobile" class="flex-1 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700">Become a Host</button>
-          <a href="#download" class="flex-1 text-center px-4 py-2 rounded-xl bg-brand-500 text-slate-900 font-semibold hover:brightness-110">Get the App</a>
-        </div>
-      </div>
+    <nav class="hidden md:flex items-center gap-6 text-sm text-slate-600">
+      <a href="#" @click.prevent="go('home')" class="hover:text-emerald-700">Coming Soon</a>
+      <a href="#" @click.prevent="go('about')" class="hover:text-emerald-700">About</a>
+      <a href="#" @click.prevent="go('contact')" class="hover:text-emerald-700">Contact</a>
+      <a href="mailto:contact@ezparkk.com" class="ml-2 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-600 text-white shadow-sm hover:brightness-95">Contact Us</a>
     </nav>
+
+    <div class="md:hidden">
+      <button @click="open = !open" class="p-2 rounded-md focus-ring bg-white shadow">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
   </header>
 
-  <!-- ROUTES -->
-  <main class="pt-28">
-    <!-- HOME ROUTE -->
-    <section id="home" class="route active">
-      <!-- HERO -->
-      <section class="relative gradient-mesh">
-        <div id="vanta" class="absolute inset-0 -z-10 opacity-60"></div>
-        <div class="mx-auto max-w-7xl px-6 py-24 lg:py-32">
-          <div class="grid lg:grid-cols-2 gap-12 items-center">
+  <!-- Mobile nav -->
+  <div x-show="open" x-transition class="md:hidden px-6 pb-6">
+    <div class="flex flex-col gap-3">
+      <a href="#" @click.prevent="go('home'); open=false" class="py-3 rounded-md text-slate-800">Coming Soon</a>
+      <a href="#" @click.prevent="go('about'); open=false" class="py-3 rounded-md text-slate-800">About</a>
+      <a href="#" @click.prevent="go('contact'); open=false" class="py-3 rounded-md text-slate-800">Contact</a>
+      <a href="mailto:contact@ezparkk.com" class="py-3 rounded-md text-white bg-emerald-600 text-center">Contact Us</a>
+    </div>
+  </div>
+
+
+  <!-- Pages -->
+  <main class="max-w-7xl mx-auto px-6 py-12">
+
+    <!-- COMING SOON -->
+    <section x-show="page === 'home'" x-transition class="grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-max" data-aos="fade-right">Launching soon</p>
+
+        <h1 class="mt-6 text-4xl md:text-5xl font-extrabold leading-tight text-emerald-900" data-aos="fade-up">Find hourly parking near you — or earn from your empty spot.</h1>
+
+        <p class="mt-4 text-slate-600 max-w-xl" data-aos="fade-up" data-aos-delay="120">EzParkk is a peer-to-peer marketplace that connects people with spare parking spots to drivers who need secure hourly parking. No subscriptions — pay per hour, book instantly, and get verified hosts.</p>
+
+        <!-- Email capture -->
+        <div class="mt-6 flex flex-col sm:flex-row gap-3" data-aos="fade-up" data-aos-delay="220">
+          <form @submit.prevent="subscribe()" class="flex gap-3 items-center w-full sm:w-auto">
+            <input x-model="email" type="email" required placeholder="Enter your email to join the waitlist" class="w-full sm:w-80 px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-200 focus:outline-none" />
+            <button type="submit" class="px-5 py-3 rounded-lg bg-emerald-600 text-white shadow hover:brightness-95">Join waitlist</button>
+          </form>
+          <button @click.prevent="becomeHost()" class="px-5 py-3 rounded-lg border border-emerald-600 text-emerald-600 bg-white">Host a spot</button>
+        </div>
+
+        <p class="mt-4 text-xs text-slate-500">We’ll only email launch updates. By joining you can get early-host incentives.</p>
+
+        <!-- small benefits -->
+        <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 bg-white rounded-xl shadow-sm" data-aos="fade-up" data-aos-delay="300">
+            <h4 class="font-semibold text-slate-800">Hourly booking</h4>
+            <p class="text-sm text-slate-500 mt-1">Book by the hour — no long-term commitments.</p>
+          </div>
+          <div class="p-4 bg-white rounded-xl shadow-sm" data-aos="fade-up" data-aos-delay="340">
+            <h4 class="font-semibold text-slate-800">Verified hosts</h4>
+            <p class="text-sm text-slate-500 mt-1">Hosts are verified and rated by drivers.</p>
+          </div>
+          <div class="p-4 bg-white rounded-xl shadow-sm" data-aos="fade-up" data-aos-delay="380">
+            <h4 class="font-semibold text-slate-800">Secure payments</h4>
+            <p class="text-sm text-slate-500 mt-1">Payments handled through secure processors.</p>
+          </div>
+        </div>
+
+        <!-- saved subscription feedback -->
+        <template x-if="subscribed">
+          <div class="mt-6 p-4 rounded-md bg-emerald-50 border border-emerald-100 text-emerald-700" x-text="subscribedMessage"></div>
+        </template>
+
+      </div>
+
+      <!-- Right column: animated preview -->
+      <div class="relative flex items-center justify-center">
+        <!-- floating mockup card -->
+        <div class="w-full max-w-md p-6 rounded-2xl bg-white shadow-2xl" data-aos="zoom-in" data-aos-delay="200">
+          <div class="flex items-center justify-between">
             <div>
-              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-slate-700 bg-slate-900/60 mb-5" data-aos="fade-down">
-                <span class="inline-block w-2 h-2 rounded-full bg-brand-500"></span>
-                <span class="text-sm text-slate-300">New: Hourly P2P parking in your city</span>
-              </div>
-              <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight" data-aos="fade-up" data-aos-delay="50">
-                Find parking in minutes. <br class="hidden sm:block"/>
-                <span class="text-brand-500">Or rent your spot</span> in seconds.
-              </h1>
-              <p class="mt-4 text-lg text-slate-300 max-w-xl" data-aos="fade-up" data-aos-delay="100">
-                EzParkk is a peer‑to‑peer marketplace connecting drivers with nearby private spots — driveways, condos, offices — available for a few hours.
-              </p>
-              <p class="mt-2 text-slate-400" data-aos="fade-up" data-aos-delay="150">
-                <span id="typed" class="font-mono"></span>
-              </p>
-              <div class="mt-8 flex flex-wrap items-center gap-3" data-aos="fade-up" data-aos-delay="200">
-                <a href="#download" class="px-5 py-3 rounded-xl bg-brand-500 text-slate-900 font-semibold hover:brightness-110">Download App</a>
-                <button id="openHostHero" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700">List Your Spot</button>
-                <a href="#map-demo" class="px-5 py-3 rounded-xl border border-slate-700 hover:bg-slate-800">See Live Map</a>
-              </div>
-              <div class="mt-8 grid grid-cols-3 gap-4 max-w-lg" data-aos="fade-up" data-aos-delay="250">
-                <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div class="text-2xl font-bold" id="statSpots">0</div>
-                  <div class="text-slate-400 text-sm">Spots listed</div>
-                </div>
-                <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div class="text-2xl font-bold" id="statMinutes">0</div>
-                  <div class="text-slate-400 text-sm">Minutes saved</div>
-                </div>
-                <div class="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                  <div class="text-2xl font-bold" id="statHosts">0</div>
-                  <div class="text-slate-400 text-sm">Active hosts</div>
-                </div>
-              </div>
+              <h3 class="font-semibold text-slate-800">EzParkk — app preview</h3>
+              <p class="text-xs text-slate-500 mt-1">Search, book & unlock — hourly parking made simple.</p>
+            </div>
+            <div class="text-xs text-slate-400">v1.0</div>
+          </div>
+
+          <!-- tiny map + list mockup -->
+          <div class="mt-6 rounded-lg overflow-hidden border border-slate-100">
+            <div class="h-40 bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center relative">
+              <!-- inline animated car along curve (CSS offset-path) -->
+              <svg viewBox="0 0 560 160" class="w-full">
+                <defs>
+                  <path id="track" d="M8 120 C 160 20, 400 220, 552 120" />
+                </defs>
+                <g class="car car-path" style="transform-origin: 0 0;">
+                  <g transform="translate(0,0)">
+                    <rect x="0" y="0" width="60" height="30" rx="6" fill="#00B894" />
+                    <circle cx="14" cy="30" r="6" fill="#0F172A"></circle>
+                    <circle cx="46" cy="30" r="6" fill="#0F172A"></circle>
+                  </g>
+                </g>
+                <path d="M8 120 C 160 20, 400 220, 552 120" fill="none" stroke="rgba(15,23,42,0.06)" stroke-width="2" stroke-dasharray="6 6"/>
+              </svg>
             </div>
 
-            <!-- Mock phone card -->
-            <div class="lg:justify-self-end w-full max-w-md mx-auto" data-aos="fade-left">
-              <div class="relative p-3 rounded-[2rem] bg-slate-900 border border-slate-800 shadow-float" style="animation: float 6s ease-in-out infinite;">
-                <div class="rounded-[1.5rem] overflow-hidden border-4 border-slate-900">
-                  <div class="aspect-[9/19] bg-slate-950 relative">
-                    <div id="lottie-hero" class="absolute inset-0"></div>
-                    <div class="absolute bottom-0 inset-x-0 p-4">
-                      <div class="rounded-xl bg-slate-900/70 p-3 border border-slate-800">
-                        <div class="flex items-center gap-2 text-sm">
-                          <i data-feather="map-pin" class="w-4 h-4"></i>
-                          <span>Spots near you now</span>
-                        </div>
-                        <div class="mt-2 grid grid-cols-3 gap-2 text-xs">
-                          <div class="rounded-lg bg-slate-800 p-2 text-center">$4/hr · 150m</div>
-                          <div class="rounded-lg bg-slate-800 p-2 text-center">$6/hr · 220m</div>
-                          <div class="rounded-lg bg-slate-800 p-2 text-center">$5/hr · 300m</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-sm font-medium">123 King St — Toronto</div>
+                  <div class="text-xs text-slate-400">Covered • 2 hrs • $3.50/hr</div>
                 </div>
+                <div class="text-sm text-emerald-600 font-semibold">Book</div>
               </div>
-              <p class="mt-3 text-center text-sm text-slate-400">Smooth micro‑interactions & real‑time map in the app.</p>
             </div>
+          </div>
+
+          <div class="mt-4 flex items-center gap-3 text-xs text-slate-500">
+            <svg class="w-4 h-4 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M3 11h18M4 21h16a1 1 0 001-1v-7H3v7a1 1 0 001 1z"/></svg>
+            <span>Host-friendly onboarding and payouts</span>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- TRUST BAR -->
-      <section class="py-10 border-y border-slate-800 bg-slate-950/60">
-        <div class="mx-auto max-w-7xl px-6">
-          <div class="flex flex-wrap items-center justify-center gap-8 opacity-80" aria-label="Trusted by early supporters">
-            <span class="text-slate-400 text-xs uppercase tracking-wider">Early backers & beta partners</span>
-            <div class="flex items-center gap-8">
-              <div class="h-6 w-24 bg-slate-800 rounded"></div>
-              <div class="h-6 w-24 bg-slate-800 rounded"></div>
-              <div class="h-6 w-24 bg-slate-800 rounded"></div>
-              <div class="h-6 w-24 bg-slate-800 rounded"></div>
-            </div>
+    <!-- ABOUT -->
+    <section x-show="page === 'about'" x-transition class="space-y-8">
+      <div class="max-w-3xl mx-auto text-center" data-aos="fade-up">
+        <h2 class="text-3xl font-extrabold text-emerald-900">Why EzParkk?</h2>
+        <p class="mt-3 text-slate-600">We make unused private parking work for local drivers and property owners. Built for cities where hourly parking matters — flexible, fair, and community-driven.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div class="p-6 bg-white rounded-2xl shadow-sm" data-aos="fade-up" data-aos-delay="80">
+          <h3 class="font-semibold text-slate-800">For drivers</h3>
+          <p class="text-sm mt-2 text-slate-500">Find cheaper, closer, and verified spaces — reserve instantly and pay by the hour.</p>
+        </div>
+        <div class="p-6 bg-white rounded-2xl shadow-sm" data-aos="fade-up" data-aos-delay="140">
+          <h3 class="font-semibold text-slate-800">For hosts</h3>
+          <p class="text-sm mt-2 text-slate-500">Turn unused curbside or private parking into extra income — flexible schedules, easy payouts.</p>
+        </div>
+        <div class="p-6 bg-white rounded-2xl shadow-sm" data-aos="fade-up" data-aos-delay="200">
+          <h3 class="font-semibold text-slate-800">For cities</h3>
+          <p class="text-sm mt-2 text-slate-500">Reduce circling traffic and make parking allocation more efficient.</p>
+        </div>
+      </div>
+
+      <div class="max-w-4xl mx-auto mt-6 grid md:grid-cols-2 gap-6 items-start">
+        <div data-aos="fade-right">
+          <h4 class="font-bold text-2xl text-emerald-900">Smart features that matter</h4>
+          <ul class="mt-4 space-y-3 text-slate-600">
+            <li>• Instant hourly bookings with clear time windows</li>
+            <li>• Host availability calendar & automated payouts</li>
+            <li>• Ratings, verifications, and dispute support</li>
+            <li>• In-app unlock or gate instructions for hosts</li>
+          </ul>
+          <div class="mt-6">
+            <a href="mailto:contact@ezparkk.com?subject=I'm%20interested%20in%20partnerships" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white">Talk partnerships</a>
           </div>
         </div>
-      </section>
+        <div data-aos="fade-left">
+          <div class="bg-white rounded-2xl p-6 shadow-sm">
+            <h5 class="text-sm font-semibold text-slate-700">How hosts earn</h5>
+            <p class="text-sm text-slate-500 mt-2">Hosts set hourly pricing and availability. We handle booking, payments, and provide trust-building tools so you can rent without constant oversight.</p>
 
-      <!-- HOW IT WORKS -->
-      <section class="py-20">
-        <div class="mx-auto max-w-7xl px-6">
-          <div class="flex items-center justify-between flex-wrap gap-4">
-            <h2 class="text-3xl font-bold">How it works</h2>
-            <div class="bg-slate-900 rounded-xl border border-slate-800 p-1">
-              <button id="tabDriver" class="px-4 py-2 rounded-lg bg-brand-500 text-slate-900 font-semibold">Drivers</button>
-              <button id="tabHost" class="px-4 py-2 rounded-lg hover:bg-slate-800">Hosts</button>
-            </div>
-          </div>
-
-          <div id="driverFlow" class="mt-10 grid md:grid-cols-3 gap-6" data-aos="fade-up">
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center mb-3"><i data-feather="search"></i></div>
-              <h3 class="font-semibold">Search nearby</h3>
-              <p class="text-slate-400 mt-1">Open the app, set your hours, and browse private spots on a live map.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center mb-3"><i data-feather="check-circle"></i></div>
-              <h3 class="font-semibold">Book instantly</h3>
-              <p class="text-slate-400 mt-1">Reserve in a tap. Clear pricing, flexible durations, easy extensions.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center mb-3"><i data-feather="navigation"></i></div>
-              <h3 class="font-semibold">Park & go</h3>
-              <p class="text-slate-400 mt-1">Navigate with turn‑by‑turn directions and spot access details.</p>
-            </div>
-          </div>
-
-          <div id="hostFlow" class="mt-10 grid md:grid-cols-3 gap-6 hidden" data-aos="fade-up">
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center mb-3"><i data-feather="map-pin"></i></div>
-              <h3 class="font-semibold">List your spot</h3>
-              <p class="text-slate-400 mt-1">Add photos, set availability by day/hour, and choose hourly pricing.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center mb-3"><i data-feather="clock"></i></div>
-              <h3 class="font-semibold">Approve or auto‑accept</h3>
-              <p class="text-slate-400 mt-1">Get booking requests or turn on instant booking to fill empty hours.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-500 flex items-center justify-center mb-3"><i data-feather="dollar-sign"></i></div>
-              <h3 class="font-semibold">Get paid</h3>
-              <p class="text-slate-400 mt-1">Payouts are sent automatically. Track earnings in your dashboard.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- FEATURES -->
-      <section class="py-10">
-        <div class="mx-auto max-w-7xl px-6 grid md:grid-cols-3 gap-6">
-          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800" data-aos="fade-up" data-aos-delay="0">
-            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center mb-3"><i data-feather="shield"></i></div>
-            <h3 class="font-semibold">Secure payments</h3>
-            <p class="text-slate-400 mt-1">Industry‑standard encryption and trusted processors keep transactions safe.</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800" data-aos="fade-up" data-aos-delay="50">
-            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center mb-3"><i data-feather="git-branch"></i></div>
-            <h3 class="font-semibold">Smart availability</h3>
-            <p class="text-slate-400 mt-1">Granular schedules by day & hour, with blackout dates and auto‑sync.</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800" data-aos="fade-up" data-aos-delay="100">
-            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center mb-3"><i data-feather="zap"></i></div>
-            <h3 class="font-semibold">Instant booking</h3>
-            <p class="text-slate-400 mt-1">Skip the back‑and‑forth with one‑tap reservations and extensions.</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800" data-aos="fade-up" data-aos-delay="150">
-            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center mb-3"><i data-feather="message-circle"></i></div>
-            <h3 class="font-semibold">In‑app messaging</h3>
-            <p class="text-slate-400 mt-1">Coordinate access or curbside instructions securely in the app.</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800" data-aos="fade-up" data-aos-delay="200">
-            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center mb-3"><i data-feather="map"></i></div>
-            <h3 class="font-semibold">Live map</h3>
-            <p class="text-slate-400 mt-1">Browse a real‑time map of available spots with distance & ETA.</p>
-          </div>
-          <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800" data-aos="fade-up" data-aos-delay="250">
-            <div class="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center mb-3"><i data-feather="star"></i></div>
-            <h3 class="font-semibold">Ratings & reviews</h3>
-            <p class="text-slate-400 mt-1">Hosts and drivers build trust with verified reviews.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- MAP DEMO -->
-      <section id="map-demo" class="py-20">
-        <div class="mx-auto max-w-7xl px-6">
-          <div class="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 class="text-3xl font-bold">Explore nearby spots</h2>
-              <p class="text-slate-400">Sample data for demo purposes.</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700" id="filterAll">All</button>
-              <button class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700" id="filterCovered">Covered</button>
-              <button class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700" id="filterEV">EV</button>
-            </div>
-          </div>
-          <div class="mt-6" data-aos="zoom-in">
-            <div id="map" aria-label="Demo map of parking spots"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TESTIMONIALS -->
-      <section class="py-20">
-        <div class="mx-auto max-w-7xl px-6">
-          <h2 class="text-3xl font-bold mb-8">What early users say</h2>
-          <div class="swiper">
-            <div class="swiper-wrapper">
-              <div class="swiper-slide">
-                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                  <p class="text-slate-300">“I parked 2 blocks from the arena for less than a coffee. Unreal.”</p>
-                  <div class="mt-3 text-sm text-slate-400">— A beta driver</div>
-                </div>
-              </div>
-              <div class="swiper-slide">
-                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                  <p class="text-slate-300">“My driveway earns while I’m at work. Set it and forget it.”</p>
-                  <div class="mt-3 text-sm text-slate-400">— A host in Toronto</div>
-                </div>
-              </div>
-              <div class="swiper-slide">
-                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                  <p class="text-slate-300">“Cheaper and closer than street parking. Five stars.”</p>
-                  <div class="mt-3 text-sm text-slate-400">— Night student</div>
-                </div>
-              </div>
-            </div>
-            <div class="swiper-pagination"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- FAQ -->
-      <section class="py-20">
-        <div class="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-10">
-          <div>
-            <h2 class="text-3xl font-bold">FAQs</h2>
-            <p class="text-slate-400 mt-2">Quick answers to common questions.</p>
-          </div>
-          <div class="space-y-3">
-            <details class="p-5 rounded-xl bg-slate-900 border border-slate-800" open>
-              <summary class="cursor-pointer font-semibold">Is EzParkk available in my city?</summary>
-              <p class="mt-2 text-slate-400">We’re launching city by city. Join the waitlist to be notified when we arrive.</p>
-            </details>
-            <details class="p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <summary class="cursor-pointer font-semibold">How do payouts work for hosts?</summary>
-              <p class="mt-2 text-slate-400">Earnings accrue automatically after each completed booking. Payouts are triggered on a regular schedule to your preferred account.</p>
-            </details>
-            <details class="p-5 rounded-xl bg-slate-900 border border-slate-800">
-              <summary class="cursor-pointer font-semibold">Can I reschedule or extend?</summary>
-              <p class="mt-2 text-slate-400">Yes. You can extend your session from the app if the spot remains available.</p>
-            </details>
-          </div>
-        </div>
-      </section>
-
-      <!-- DOWNLOAD CTA -->
-      <section id="download" class="py-20 border-t border-slate-800">
-        <div class="mx-auto max-w-7xl px-6">
-          <div class="grid md:grid-cols-5 gap-10 items-center">
-            <div class="md:col-span-3">
-              <h2 class="text-3xl font-bold">Get the app</h2>
-              <p class="text-slate-400 mt-2">Scan to download or join the waitlist.</p>
-              <div class="mt-5 flex items-center gap-3">
-                <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800">
-                  <i data-feather="apple"></i>
-                  <span>App Store</span>
-                </a>
-                <a href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800">
-                  <i data-feather="download"></i>
-                  <span>Google Play</span>
-                </a>
-              </div>
-            </div>
-            <div class="md:col-span-2">
-              <div class="rounded-2xl bg-slate-900 border border-slate-800 p-5 w-full">
+            <div class="mt-4 grid gap-3">
+              <div class="p-3 rounded-lg border border-slate-100">
                 <div class="flex items-center justify-between">
                   <div>
-                    <div class="text-sm text-slate-400">Scan to open</div>
-                    <div class="text-lg font-semibold">ezparkk.com/app</div>
+                    <div class="text-xs text-slate-500">Estimated monthly</div>
+                    <div class="text-lg font-semibold text-emerald-700">$120 — $450</div>
                   </div>
-                  <div id="qrcode" class="bg-white p-2 rounded"></div>
+                  <div class="text-xs text-slate-400">Depends on location & hours</div>
                 </div>
-                <form id="waitlistForm" class="mt-5 flex gap-2">
-                  <input required type="email" id="waitEmail" placeholder="you@example.com" class="flex-1 px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-brand-500" />
-                  <button class="px-4 py-3 rounded-xl bg-brand-500 text-slate-900 font-semibold">Join</button>
-                </form>
-                <p id="waitlistMsg" class="text-sm text-brand-500 mt-3 hidden">Added to waitlist ✔️</p>
               </div>
+              <div class="text-xs text-slate-500">* sample estimates for demonstration only.</div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </section>
 
-    <!-- ABOUT ROUTE -->
-    <section id="about" class="route">
-      <section class="py-16">
-        <div class="mx-auto max-w-7xl px-6">
-          <h1 class="text-4xl font-extrabold">About EzParkk</h1>
-          <p class="mt-4 text-slate-300 max-w-3xl">We’re on a mission to end circling and turn underused space into opportunity. Our platform helps cities breathe, drivers save time and money, and property owners earn from their assets.</p>
+    <!-- CONTACT -->
+    <section x-show="page === 'contact'" x-transition class="max-w-3xl mx-auto mt-6">
+      <div class="bg-white p-8 rounded-2xl shadow-sm" data-aos="fade-up">
+        <h2 class="text-2xl font-bold text-emerald-900">Get in touch</h2>
+        <p class="text-slate-600 mt-2">Questions, partnerships, or early-host interest — reach us at <strong>contact@ezparkk.com</strong>. Use the form below to prefill an email draft in your mail app.</p>
 
-          <div class="mt-10 grid md:grid-cols-3 gap-6">
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="text-sm text-slate-400">Founded</div>
-              <div class="text-xl font-semibold">2025</div>
-              <p class="mt-2 text-slate-400">Built in Toronto, for cities everywhere.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="text-sm text-slate-400">Model</div>
-              <div class="text-xl font-semibold">Peer‑to‑peer</div>
-              <p class="mt-2 text-slate-400">A community marketplace for hourly parking.</p>
-            </div>
-            <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="text-sm text-slate-400">Focus</div>
-              <div class="text-xl font-semibold">Mobile‑first</div>
-              <p class="mt-2 text-slate-400">Fast, delightful iOS & Android experience.</p>
-            </div>
-          </div>
-
-          <div class="mt-14">
-            <h2 class="text-2xl font-bold">Our story</h2>
-            <ol class="mt-4 relative border-l border-slate-800">
-              <li class="ml-6 mb-8">
-                <span class="absolute -left-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-500"></span>
-                <h3 class="font-semibold">Frustration to spark</h3>
-                <p class="text-slate-400">After one too many nights circling downtown, we started sketching a better way.</p>
-              </li>
-              <li class="ml-6 mb-8">
-                <span class="absolute -left-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-500"></span>
-                <h3 class="font-semibold">Prototype & pilots</h3>
-                <p class="text-slate-400">We built a prototype, partnered with early hosts, and ran pilots near campuses & venues.</p>
-              </li>
-              <li class="ml-6">
-                <span class="absolute -left-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-500"></span>
-                <h3 class="font-semibold">Community & growth</h3>
-                <p class="text-slate-400">Now we’re growing a community where parking is predictable and stress‑free.</p>
-              </li>
-            </ol>
-          </div>
-
-          <div class="mt-14">
-            <h2 class="text-2xl font-bold">Values</h2>
-            <div class="mt-4 grid md:grid-cols-3 gap-6">
-              <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                <h3 class="font-semibold">Trust first</h3>
-                <p class="text-slate-400">Verified users, transparent pricing, and clear communication.</p>
-              </div>
-              <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                <h3 class="font-semibold">City‑friendly</h3>
-                <p class="text-slate-400">Less circling means fewer emissions and safer streets.</p>
-              </div>
-              <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                <h3 class="font-semibold">Host‑empowering</h3>
-                <p class="text-slate-400">Make it effortless to earn from unused space.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-14">
-            <h2 class="text-2xl font-bold">Team</h2>
-            <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-accent-500"></div>
-                  <div>
-                    <div class="font-semibold">Founder</div>
-                    <div class="text-sm text-slate-400">Product & Engineering</div>
-                  </div>
-                </div>
-                <p class="mt-3 text-slate-400">Obsessed with shaving minutes off your day.</p>
-              </div>
-              <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-accent-500"></div>
-                  <div>
-                    <div class="font-semibold">Design</div>
-                    <div class="text-sm text-slate-400">UX & Brand</div>
-                  </div>
-                </div>
-                <p class="mt-3 text-slate-400">Crafting a calm, confident experience.</p>
-              </div>
-              <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-                <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-500 to-accent-500"></div>
-                  <div>
-                    <div class="font-semibold">Community</div>
-                    <div class="text-sm text-slate-400">Hosts & Drivers</div>
-                  </div>
-                </div>
-                <p class="mt-3 text-slate-400">Support with empathy and speed.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <!-- CONTACT ROUTE -->
-    <section id="contact" class="route">
-      <section class="py-16">
-        <div class="mx-auto max-w-7xl px-6 grid lg:grid-cols-2 gap-10 items-start">
+        <form @submit.prevent="sendEmail()" class="mt-6 space-y-4">
           <div>
-            <h1 class="text-4xl font-extrabold">Get in touch</h1>
-            <p class="mt-4 text-slate-300">We’d love to hear from you — partnerships, media, hosting, or beta access.</p>
-
-            <div class="mt-8 p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="flex items-center gap-3">
-                <i data-feather="mail"></i>
-                <a class="underline decoration-brand-500 underline-offset-4" href="mailto:contact@ezparkk.com">contact@ezparkk.com</a>
-              </div>
-              <div class="mt-3 flex items-center gap-3">
-                <i data-feather="map"></i>
-                <span>Toronto, Canada</span>
-              </div>
-            </div>
-
-            <div class="mt-8">
-              <h2 class="text-2xl font-bold">Press kit</h2>
-              <p class="text-slate-400">Logos & brand assets available on request.</p>
-            </div>
+            <label class="text-sm text-slate-600">Your name</label>
+            <input x-model="contact.name" class="mt-1 w-full px-4 py-2 rounded-md border border-slate-200 focus:ring-2 focus:ring-emerald-200" required />
           </div>
-
           <div>
-            <form id="contactForm" class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
-              <div class="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="text-sm text-slate-400">Name</label>
-                  <input required id="cName" class="mt-1 w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-brand-500" />
-                </div>
-                <div>
-                  <label class="text-sm text-slate-400">Email</label>
-                  <input required type="email" id="cEmail" class="mt-1 w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-brand-500" />
-                </div>
-              </div>
-              <div class="mt-4">
-                <label class="text-sm text-slate-400">Topic</label>
-                <select id="cTopic" class="mt-1 w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800">
-                  <option>General</option>
-                  <option>Become a Host</option>
-                  <option>Partnerships</option>
-                  <option>Press</option>
-                </select>
-              </div>
-              <div class="mt-4">
-                <label class="text-sm text-slate-400">Message</label>
-                <textarea required id="cMsg" rows="5" class="mt-1 w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-brand-500" placeholder="How can we help?" ></textarea>
-              </div>
-              <div class="mt-5 flex gap-2">
-                <button class="px-5 py-3 rounded-xl bg-brand-500 text-slate-900 font-semibold" type="submit">Send</button>
-                <a href="mailto:contact@ezparkk.com" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700">Email us</a>
-              </div>
-              <p id="contactMsg" class="text-sm text-brand-500 mt-3 hidden">Opening your email app…</p>
-            </form>
+            <label class="text-sm text-slate-600">Email</label>
+            <input x-model="contact.email" type="email" class="mt-1 w-full px-4 py-2 rounded-md border border-slate-200 focus:ring-2 focus:ring-emerald-200" required />
           </div>
-        </div>
-      </section>
+          <div>
+            <label class="text-sm text-slate-600">Message</label>
+            <textarea x-model="contact.message" rows="4" class="mt-1 w-full px-4 py-2 rounded-md border border-slate-200 focus:ring-2 focus:ring-emerald-200" placeholder="Hi EzParkk — I'm interested in..." required></textarea>
+          </div>
+
+          <div class="flex gap-3">
+            <button type="submit" class="px-4 py-2 rounded-lg bg-emerald-600 text-white">Email us</button>
+            <a class="px-4 py-2 rounded-lg border border-slate-200" href="mailto:contact@ezparkk.com">Open mail app</a>
+          </div>
+        </form>
+
+      </div>
     </section>
+
   </main>
 
-  <!-- FOOTER -->
-  <footer class="border-t border-slate-800">
-    <div class="mx-auto max-w-7xl px-6 py-10">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <svg width="28" height="28" viewBox="0 0 100 100" aria-hidden="true">
-            <rect rx="20" width="100" height="100" fill="#111827" />
-            <path d="M25 70 L50 20 L75 70 Z" fill="#84cc16" />
-            <circle cx="50" cy="68" r="10" fill="#0ea5e9" />
-          </svg>
-          <span class="font-semibold">EzParkk</span>
-        </div>
-        <div class="text-sm text-slate-400">© <span id="year"></span> EzParkk Inc. All rights reserved.</div>
-        <div class="flex items-center gap-3 text-slate-400">
-          <a class="hover:text-white" href="#about">About</a>
-          <a class="hover:text-white" href="#contact">Contact</a>
-          <a class="hover:text-white" href="#home">Home</a>
-        </div>
+  <!-- Footer -->
+  <footer class="mt-12 py-8 border-t border-slate-100">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-sm text-slate-500">© EzParkk — Peer-to-peer hourly parking</div>
+      <div class="flex items-center gap-4">
+        <a href="#" class="text-slate-500 text-sm">Privacy</a>
+        <a href="#" class="text-slate-500 text-sm">Terms</a>
+        <a href="mailto:contact@ezparkk.com" class="text-sm text-emerald-600">contact@ezparkk.com</a>
       </div>
     </div>
   </footer>
 
-  <!-- HOST MODAL -->
-  <div id="hostModal" class="fixed inset-0 z-[60] hidden">
-    <div class="absolute inset-0 bg-slate-900/70"></div>
-    <div class="relative mx-auto max-w-lg mt-24 p-6 rounded-2xl bg-slate-900 border border-slate-800">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-semibold">List your driveway or spot</h3>
-        <button id="closeHost" aria-label="Close modal"><i data-feather="x"></i></button>
-      </div>
-      <p class="mt-2 text-slate-400">Join the host waitlist to get early perks and priority placement.</p>
-      <form id="hostForm" class="mt-4 space-y-3">
-        <input required type="text" id="hAddress" placeholder="Address (City, Street)" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800" />
-        <input required type="email" id="hEmail" placeholder="you@example.com" class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800" />
-        <div class="flex items-center gap-2">
-          <input id="hCovered" type="checkbox" class="w-4 h-4" />
-          <label for="hCovered" class="text-sm text-slate-300">Covered spot</label>
+  <!-- Host modal (simple) -->
+  <div x-show="hostModal" x-transition class="fixed inset-0 z-50 flex items-center justify-center">
+    <div @click="hostModal=false" class="absolute inset-0 backdrop"></div>
+    <div class="relative bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+      <h3 class="text-lg font-semibold">Become a host</h3>
+      <p class="text-sm text-slate-500 mt-1">Tell us about your spot and we’ll reach out with onboarding details.</p>
+
+      <form @submit.prevent="hostSubmit()" class="mt-4 space-y-3">
+        <input x-model="host.name" placeholder="Your name" class="w-full px-3 py-2 border rounded-md" required />
+        <input x-model="host.location" placeholder="Address or neighbourhood" class="w-full px-3 py-2 border rounded-md" required />
+        <input x-model="host.phone" placeholder="Phone (optional)" class="w-full px-3 py-2 border rounded-md" />
+        <div class="flex justify-end gap-2">
+          <button type="button" @click="hostModal=false" class="px-4 py-2 rounded-md border">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-md bg-emerald-600 text-white">Send</button>
         </div>
-        <button class="w-full px-4 py-3 rounded-xl bg-brand-500 text-slate-900 font-semibold">Join Host Waitlist</button>
       </form>
-      <p id="hostMsg" class="text-sm text-brand-500 mt-3 hidden">You’re on the list! We’ll be in touch.</p>
     </div>
   </div>
 
-  <!-- SCRIPTS: Open‑source libraries (MIT/Permissive) from GitHub via CDNs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-  <script src="https://unpkg.com/aos@2.3.4/dist/aos.js" defer></script>
-  <script src="https://unpkg.com/swiper@9/swiper-bundle.min.js" defer></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.29.2/dist/feather.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.waves.min.js" defer></script>
+</div> <!-- end SPA root -->
 
-  <script>
-    // --- Router (hash-based) for 3 functional pages ---
-    const routes = ['home', 'about', 'contact'];
-    function setRoute(hash) {
-      const target = (hash || '#home').replace('#','');
-      routes.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.toggle('active', id === target);
-      });
-      // Close mobile menu on navigation
-      document.getElementById('mobileMenu').classList.add('hidden');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    window.addEventListener('hashchange', () => setRoute(location.hash));
-    document.addEventListener('DOMContentLoaded', () => setRoute(location.hash));
-
-    // --- Navbar mobile toggle ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('menuBtn');
-      const menu = document.getElementById('mobileMenu');
-      btn?.addEventListener('click', () => menu.classList.toggle('hidden'));
-      document.getElementById('openHost')?.addEventListener('click', openHost);
-      document.getElementById('openHostMobile')?.addEventListener('click', openHost);
-      document.getElementById('openHostHero')?.addEventListener('click', openHost);
-      document.getElementById('closeHost')?.addEventListener('click', closeHost);
-    });
-
-    // --- Feather icons ---
-    document.addEventListener('DOMContentLoaded', () => feather.replace());
-
-    // --- Typed.js hero subtitle ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const typedEl = document.getElementById('typed');
-      if (typedEl) new Typed(typedEl, {
-        strings: ['Stress‑free parking • Real people • Real driveways', 'Find • Reserve • Park • Go', 'Earn extra from your unused spot'],
-        typeSpeed: 30, backSpeed: 10, backDelay: 1800, loop: true
-      });
-    });
-
-    // --- AOS init ---
-    document.addEventListener('DOMContentLoaded', () => AOS.init({ duration: 700, once: true }));
-
-    // --- Swiper init ---
-    document.addEventListener('DOMContentLoaded', () => {
-      new Swiper('.swiper', { pagination: { el: '.swiper-pagination' }, autoplay: { delay: 3500 }, loop: true });
-    });
-
-    // --- GSAP subtle reveal on scroll ---
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.gsap && window.ScrollTrigger) {
-        gsap.utils.toArray('[data-aos]') // piggyback elements
-          .forEach((el) => {
-            gsap.from(el, { opacity: 0, y: 20, duration: 0.6, scrollTrigger: { trigger: el, start: 'top 80%' } });
-          });
-      }
-    });
-
-    // --- Lottie demo phone animation ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('lottie-hero');
-      if (container && window.lottie) {
-        // Simple pulsing dots animation (inline JSON for single-file)
-        const animData = {
-          v: '5.7.6', fr: 60, ip: 0, op: 240, w: 400, h: 800, nm: 'pulses', ddd: 0, assets: [], layers: []
-        };
-        // Fallback: if minimal anim, just create dots via DOM
-        const dots = document.createElement('div');
-        dots.innerHTML = '<div style="position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);display:flex;gap:10px">'+
-          '<span style="width:10px;height:10px;border-radius:50%;background:#84cc16;display:inline-block;animation: pulse 1.2s infinite"></span>'+ 
-          '<span style="width:10px;height:10px;border-radius:50%;background:#0ea5e9;display:inline-block;animation: pulse 1.2s .2s infinite"></span>'+ 
-          '<span style="width:10px;height:10px;border-radius:50%;background:#84cc16;display:inline-block;animation: pulse 1.2s .4s infinite"></span>'+ 
-          '</div>';
-        container.appendChild(dots);
-        const style = document.createElement('style');
-        style.textContent = '@keyframes pulse{0%{transform:scale(0.8);opacity:.6}50%{transform:scale(1);opacity:1}100%{transform:scale(0.8);opacity:.6}}';
-        document.head.appendChild(style);
-      }
-    });
-
-    // --- Vanta Waves background ---
-    let vantaEffect;
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.VANTA && window.THREE) {
-        vantaEffect = VANTA.WAVES({
-          el: '#vanta', THREE: window.THREE, color: 0x84cc16, shininess: 35, waveSpeed: 0.7, zoom: 0.9, waveHeight: 14, color2: 0x0ea5e9, scale: 1.0, scaleMobile: 1.0
-        });
-      }
-    });
-    window.addEventListener('unload', () => vantaEffect && vantaEffect.destroy && vantaEffect.destroy());
-
-    // --- CountUp stats ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const u = window.countUp.CountUp;
-            new u('statSpots', 2480, { duration: 2.2 }).start();
-            new u('statMinutes', 91234, { duration: 2.2 }).start();
-            new u('statHosts', 540, { duration: 2.2 }).start();
-            observer.disconnect();
-          }
-        });
-      }, { threshold: 0.6 });
-      const el = document.getElementById('statSpots');
-      if (el) observer.observe(el.closest('.grid'));
-    });
-
-    // --- How it works tabs ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const tabDriver = document.getElementById('tabDriver');
-      const tabHost = document.getElementById('tabHost');
-      const driverFlow = document.getElementById('driverFlow');
-      const hostFlow = document.getElementById('hostFlow');
-      function activate(isDriver) {
-        driverFlow.classList.toggle('hidden', !isDriver); hostFlow.classList.toggle('hidden', isDriver);
-        tabDriver.classList.toggle('bg-brand-500', isDriver); tabDriver.classList.toggle('text-slate-900', isDriver);
-        tabHost.classList.toggle('bg-brand-500', !isDriver); tabHost.classList.toggle('text-slate-900', !isDriver);
-      }
-      tabDriver?.addEventListener('click', () => activate(true));
-      tabHost?.addEventListener('click', () => activate(false));
-    });
-
-    // --- Leaflet map demo ---
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!window.L) return;
-      const map = L.map('map', { scrollWheelZoom: false }).setView([43.6532, -79.3832], 13); // Toronto
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
-      const spots = [
-        { id: 1, name: 'Queen St Driveway', price: 4, lat: 43.651, lng: -79.385, covered: false, ev: false },
-        { id: 2, name: 'Covered Condo Spot', price: 6, lat: 43.655, lng: -79.38, covered: true, ev: true },
-        { id: 3, name: 'Office Hours Lot', price: 5, lat: 43.66, lng: -79.39, covered: false, ev: false },
-        { id: 4, name: 'EV Ready Garage', price: 7, lat: 43.648, lng: -79.375, covered: true, ev: true }
-      ];
-      const markers = [];
-      const green = L.icon({ iconUrl: 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42"><path fill="#84cc16" d="M16 0C7.163 0 0 7.163 0 16c0 11.2 16 26 16 26s16-14.8 16-26C32 7.163 24.837 0 16 0z"/><circle cx="16" cy="16" r="6" fill="#0b1220"/></svg>`), iconSize: [32,42], iconAnchor: [16,42], popupAnchor: [0,-36] });
-      function addMarkers(filter) {
-        markers.forEach(m => map.removeLayer(m)); markers.length = 0;
-        spots.filter(s => !filter || filter(s)).forEach(s => {
-          const m = L.marker([s.lat, s.lng], { icon: green }).addTo(map).bindPopup(`<b>${s.name}</b><br>$${s.price}/hr · ${s.covered ? 'Covered' : 'Open'} ${s.ev ? '· EV' : ''}`);
-          markers.push(m);
-        });
-      }
-      addMarkers();
-      document.getElementById('filterAll')?.addEventListener('click', () => addMarkers());
-      document.getElementById('filterCovered')?.addEventListener('click', () => addMarkers(s => s.covered));
-      document.getElementById('filterEV')?.addEventListener('click', () => addMarkers(s => s.ev));
-    });
-
-    // --- QR code ---
-    document.addEventListener('DOMContentLoaded', () => {
-      const el = document.getElementById('qrcode');
-      if (el && window.QRCode) new QRCode(el, { text: 'https://ezparkk.com/app', width: 84, height: 84 });
-    });
-
-    // --- Forms (localStorage + mailto) ---
-    function openHost() { document.getElementById('hostModal').classList.remove('hidden'); }
-    function closeHost() { document.getElementById('hostModal').classList.add('hidden'); }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Host form
-      const hostForm = document.getElementById('hostForm');
-      const hostMsg = document.getElementById('hostMsg');
-      hostForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const data = {
-          address: document.getElementById('hAddress').value.trim(),
-          email: document.getElementById('hEmail').value.trim(),
-          covered: document.getElementById('hCovered').checked,
-          ts: new Date().toISOString()
-        };
-        const list = JSON.parse(localStorage.getItem('ez_host_waitlist') || '[]');
-        list.push(data); localStorage.setItem('ez_host_waitlist', JSON.stringify(list));
-        hostMsg.classList.remove('hidden');
-        setTimeout(() => { hostMsg.classList.add('hidden'); closeHost(); }, 1800);
-      });
-
-      // Waitlist form
-      const waitForm = document.getElementById('waitlistForm');
-      const waitMsg = document.getElementById('waitlistMsg');
-      waitForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const email = document.getElementById('waitEmail').value.trim();
-        const list = JSON.parse(localStorage.getItem('ez_user_waitlist') || '[]');
-        if (!list.includes(email)) list.push(email);
-        localStorage.setItem('ez_user_waitlist', JSON.stringify(list));
-        waitMsg.classList.remove('hidden');
-        setTimeout(() => waitMsg.classList.add('hidden'), 1800);
-      });
-
-      // Contact form -> mailto
-      const cForm = document.getElementById('contactForm');
-      const cMsg = document.getElementById('contactMsg');
-      cForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('cName').value.trim();
-        const email = document.getElementById('cEmail').value.trim();
-        const topic = document.getElementById('cTopic').value;
-        const msg = document.getElementById('cMsg').value.trim();
-        const subject = encodeURIComponent(`[EzParkk] ${topic} — ${name}`);
-        const body = encodeURIComponent(`${msg}\n\nFrom: ${name} <${email}>`);
-        cMsg.classList.remove('hidden');
+<!-- Scripts -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  function landingApp(){
+    return {
+      page: 'home',
+      open: false,
+      email: '',
+      subscribed: false,
+      subscribedMessage: '',
+      hostModal: false,
+      host: { name: '', location: '', phone: '' },
+      contact: { name: '', email: '', message: '' },
+      init(){
+        AOS.init({ once: true, duration: 700 });
+        // restore if user already subscribed
+        const saved = localStorage.getItem('ez_subscribed');
+        if(saved) { this.subscribed = true; this.subscribedMessage = 'You are on the waitlist — we will email you updates.' }
+      },
+      go(which){ this.page = which; window.scrollTo({top:120, behavior:'smooth'}); },
+      subscribe(){
+        // basic validation & storage (demo-only)
+        if(!this.email) return;
+        localStorage.setItem('ez_subscribed', this.email);
+        this.subscribed = true;
+        this.subscribedMessage = `Thanks — ${this.email} added to waitlist. We'll email updates to you.`;
+        // optionally open mailto to notify team
+        // window.location = `mailto:contact@ezparkk.com?subject=New%20waitlist%20signup&body=${encodeURIComponent(this.email)}`;
+        this.email = '';
+      },
+      becomeHost(){ this.hostModal = true },
+      hostSubmit(){
+        // send host info via mailto (prefill) to contact@ezparkk.com
+        const subject = encodeURIComponent('Host application from website');
+        const body = encodeURIComponent(`Name: ${this.host.name}\nLocation: ${this.host.location}\nPhone: ${this.host.phone}`);
         window.location.href = `mailto:contact@ezparkk.com?subject=${subject}&body=${body}`;
-        setTimeout(() => cMsg.classList.add('hidden'), 2500);
-      });
-    });
+        this.hostModal = false;
+      },
+      sendEmail(){
+        if(!this.contact.email || !this.contact.message) return;
+        const subject = encodeURIComponent('Website contact — ' + (this.contact.name || 'No name'));
+        const body = encodeURIComponent(this.contact.message + '\n\nFrom: ' + this.contact.name + ' (' + this.contact.email + ')');
+        window.location.href = `mailto:contact@ezparkk.com?subject=${subject}&body=${body}`;
+      }
+    }
+  }
+</script>
 
-    // --- Year ---
-    document.addEventListener('DOMContentLoaded', () => { document.getElementById('year').textContent = new Date().getFullYear(); });
-  </script>
 </body>
 </html>
