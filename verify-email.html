@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - EzPark</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0080FF 0%, #0050CC 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0080FF 0%, #0050CC 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .status-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            color: #4CAF50;
+        }
+
+        .error {
+            color: #F44336;
+        }
+
+        .loading {
+            color: #0080FF;
+        }
+
+        h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 128, 255, 0.1);
+            border-top: 4px solid #0080FF;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #0080FF 0%, #0050CC 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 128, 255, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 128, 255, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            background: #f5f5f5;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .footer a {
+            color: #0080FF;
+            text-decoration: none;
+        }
+
+        .error-details {
+            background: #FFEBEE;
+            border-left: 4px solid #F44336;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .error-details p {
+            color: #C62828;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🅿️</div>
+            <h1>EzPark</h1>
+            <p>Park Smarter, Not Harder</p>
+        </div>
+
+        <div class="content" id="content">
+            <div class="status-icon loading">⏳</div>
+            <h2>Verifying Your Email...</h2>
+            <div class="spinner"></div>
+            <p>Please wait while we verify your email address.</p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 EzPark. All rights reserved.</p>
+            <p><a href="https://ezparkk.com">Visit Our Website</a> | <a href="mailto:support@ezparkk.com">Contact Support</a></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBYQjqrvy8sQ94ts_8pKHELJezmGp-eIn4",
+            authDomain: "ezparkk-e4d3b.firebaseapp.com",
+            projectId: "ezparkk-e4d3b",
+            storageBucket: "ezparkk-e4d3b.firebasestorage.app",
+            messagingSenderId: "473703911799",
+            appId: "1:473703911799:ios:aca798a79c7a029509d172"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Get the action code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const oobCode = urlParams.get('oobCode');
+        const continueUrl = urlParams.get('continueUrl');
+
+        const content = document.getElementById('content');
+
+        // Handle email verification
+        if (mode === 'verifyEmail' && oobCode) {
+            auth.applyActionCode(oobCode)
+                .then(() => {
+                    // Email verified successfully
+                    content.innerHTML = `
+                        <div class="status-icon success">✅</div>
+                        <h2>Email Verified!</h2>
+                        <p>Your email has been successfully verified. You can now use all features of EzPark.</p>
+                        <p>Redirecting you to the app...</p>
+                        <a href="ezparkk://email-verified" class="button">Open EzPark App</a>
+                    `;
+
+                    // Try to redirect to the app
+                    setTimeout(() => {
+                        window.location.href = 'ezparkk://email-verified';
+                    }, 2000);
+                })
+                .catch((error) => {
+                    // Error verifying email
+                    let errorMessage = 'An error occurred while verifying your email.';
+                    let errorDetails = error.message;
+
+                    if (error.code === 'auth/expired-action-code') {
+                        errorMessage = 'This verification link has expired.';
+                        errorDetails = 'Please request a new verification email from the app.';
+                    } else if (error.code === 'auth/invalid-action-code') {
+                        errorMessage = 'This verification link is invalid.';
+                        errorDetails = 'The link may have already been used or is malformed.';
+                    } else if (error.code === 'auth/user-disabled') {
+                        errorMessage = 'Your account has been disabled.';
+                        errorDetails = 'Please contact support for assistance.';
+                    } else if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'Account not found.';
+                        errorDetails = 'The account associated with this link could not be found.';
+                    }
+
+                    content.innerHTML = `
+                        <div class="status-icon error">❌</div>
+                        <h2>${errorMessage}</h2>
+                        <div class="error-details">
+                            <p><strong>Error:</strong> ${errorDetails}</p>
+                            <p><strong>Error Code:</strong> ${error.code || 'Unknown'}</p>
+                        </div>
+                        <p>If you continue to experience issues, please contact our support team.</p>
+                        <a href="mailto:support@ezparkk.com" class="button">Contact Support</a>
+                    `;
+                });
+        } else {
+            // Invalid mode or missing oobCode
+            content.innerHTML = `
+                <div class="status-icon error">❌</div>
+                <h2>Invalid Link</h2>
+                <p>This verification link is invalid or incomplete.</p>
+                <p>Please check your email and click the correct link, or request a new verification email from the app.</p>
+                <a href="ezparkk://home" class="button">Open EzPark App</a>
+            `;
+        }
+    </script>
+</body>
+</html>
+
