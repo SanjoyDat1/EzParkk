@@ -283,46 +283,6 @@
             transform: translateY(0);
         }
         
-        .button.hidden {
-            display: none;
-        }
-        
-        .loading-state {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 18px;
-            background: #F7F9FC;
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .loading-state.hidden {
-            display: none;
-        }
-        
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #FFE0B2;
-            border-top-color: #FF6B35;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .loading-text {
-            color: #FF6B35;
-            font-weight: 500;
-            font-size: 15px;
-        }
-        
         .footer {
             padding: 0 24px 24px;
             text-align: center;
@@ -397,7 +357,7 @@
                         <div class="step-number">1</div>
                         <div class="step-content">
                             <div class="step-title">Return to EzPark</div>
-                            <div class="step-desc">We'll redirect you automatically</div>
+                            <div class="step-desc">Tap the button below when ready</div>
                         </div>
                     </li>
                     <li class="step">
@@ -417,12 +377,7 @@
                 </ul>
             </div>
             
-            <div class="loading-state" id="loading">
-                <div class="spinner"></div>
-                <span class="loading-text">Returning to EzPark...</span>
-            </div>
-            
-            <button class="button hidden" id="openBtn">Return to EzPark</button>
+            <button class="button" id="openBtn">Return to EzPark</button>
         </div>
         
         <div class="footer">
@@ -437,22 +392,15 @@
     </div>
 
     <script>
-        const APP_SCHEME = 'ezparkk://';
-        const ATTEMPT_DELAY = 1500;
-        const MAX_ATTEMPTS = 3;
-        
-        let attemptCount = 0;
-        const loadingEl = document.getElementById('loading');
+        const APP_SCHEME = 'ezparkk://stripe-refresh';
         const btnEl = document.getElementById('openBtn');
         
-        function attemptOpenApp() {
-            if (attemptCount >= MAX_ATTEMPTS) {
-                showManualButton();
-                return;
-            }
-            
-            attemptCount++;
-            console.log(`Attempt ${attemptCount}/${MAX_ATTEMPTS}`);
+        // IMPORTANT: NO AUTO-REDIRECT! Only open app when user clicks button
+        // This prevents infinite loops if the account isn't verified yet
+        
+        btnEl.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('User clicked Return to EzPark button');
             
             // Try to open the app
             const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -461,36 +409,9 @@
             } else {
                 window.location.href = APP_SCHEME;
             }
-            
-            setTimeout(attemptOpenApp, ATTEMPT_DELAY);
-        }
-        
-        function showManualButton() {
-            loadingEl.classList.add('hidden');
-            btnEl.classList.remove('hidden');
-        }
-        
-        btnEl.addEventListener('click', function(e) {
-            e.preventDefault();
-            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-            if (isIOS) {
-                window.location = APP_SCHEME;
-            } else {
-                window.location.href = APP_SCHEME;
-            }
         });
         
-        // Start after page loads
-        window.addEventListener('load', function() {
-            setTimeout(attemptOpenApp, 800);
-        });
-        
-        // Try again when page becomes visible
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden && attemptCount < MAX_ATTEMPTS) {
-                setTimeout(attemptOpenApp, 500);
-            }
-        });
+        console.log('Stripe refresh page loaded - waiting for user to click button');
     </script>
 </body>
 </html>
