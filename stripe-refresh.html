@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continue Setup - EzPark</title>
+    <meta name="description" content="Continue your Stripe setup in the EzPark app">
+    
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 48px 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            color: #333;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+            animation: rotate 2s ease-in-out infinite;
+        }
+        
+        @keyframes rotate {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(180deg);
+            }
+        }
+        
+        h1 {
+            margin: 0 0 16px 0;
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #f59e0b;
+            color: white;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            margin: 0 0 24px 0;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #666;
+        }
+        
+        .instructions {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 24px 0;
+            text-align: left;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .instructions h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #92400e;
+        }
+        
+        .instructions p {
+            margin: 0;
+            color: #92400e;
+            font-size: 15px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(245, 158, 11, 0.2);
+            border-top: 4px solid #f59e0b;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 24px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .note {
+            font-size: 13px;
+            color: #999;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        
+        #message {
+            font-size: 16px;
+            color: #f59e0b;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔄</div>
+        <div class="status">CONTINUE SETUP</div>
+        <h1>Session Expired</h1>
+        <p>Your setup session has expired. Don't worry, we can continue where you left off!</p>
+        
+        <div class="instructions">
+            <h3>⚠️ What Happened?</h3>
+            <p>The Stripe setup link has expired. Return to the EzPark app and tap "Continue Setup" to get a fresh link.</p>
+        </div>
+        
+        <div class="spinner"></div>
+        <p id="message">Returning to EzPark app...</p>
+        
+        <div id="manual-controls" class="hidden">
+            <a href="ezparkk://" class="button" id="open-app-btn">Open EzPark App</a>
+            <p class="note">Tap the button to return to the app and continue your setup</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const APP_SCHEME = 'ezparkk://';
+        const ATTEMPT_DELAY = 1500; // 1.5 seconds
+        const SHOW_BUTTON_DELAY = 3000; // 3 seconds
+        
+        // Log for debugging
+        console.log('Stripe refresh page loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('User Agent:', navigator.userAgent);
+        
+        // Detect mobile devices
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        
+        console.log('Is Mobile:', isMobile);
+        console.log('Is iOS:', isIOS);
+        
+        let attemptCount = 0;
+        const maxAttempts = 3;
+        
+        // Function to attempt opening the app
+        function attemptOpenApp() {
+            attemptCount++;
+            console.log(`Attempt ${attemptCount} to open app...`);
+            
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = `Returning to EzPark... (${attemptCount}/${maxAttempts})`;
+            
+            // Try to open the app
+            if (isIOS) {
+                // iOS: Use window.location for better compatibility
+                window.location = APP_SCHEME;
+            } else {
+                // Android and others
+                window.location.href = APP_SCHEME;
+            }
+            
+            // Schedule next attempt or show manual button
+            if (attemptCount < maxAttempts) {
+                setTimeout(attemptOpenApp, ATTEMPT_DELAY);
+            } else {
+                // Show manual button after all attempts
+                setTimeout(showManualButton, 500);
+            }
+        }
+        
+        // Function to show manual open button
+        function showManualButton() {
+            console.log('Showing manual open button');
+            const spinner = document.querySelector('.spinner');
+            const messageEl = document.getElementById('message');
+            const manualControls = document.getElementById('manual-controls');
+            
+            spinner.style.display = 'none';
+            messageEl.textContent = 'Ready to continue?';
+            manualControls.classList.remove('hidden');
+        }
+        
+        // Setup manual button click handler
+        document.getElementById('open-app-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Manual open button clicked');
+            
+            // Try to open app
+            if (isIOS) {
+                window.location = APP_SCHEME;
+            } else {
+                window.location.href = APP_SCHEME;
+            }
+            
+            // Update message
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = 'Opening EzPark...';
+            
+            // If still here after 2 seconds, show a different message
+            setTimeout(function() {
+                messageEl.textContent = 'Return to the app and tap "Continue Setup"';
+            }, 2000);
+        });
+        
+        // Start the process after a short delay to ensure page is fully loaded
+        setTimeout(function() {
+            console.log('Starting app open sequence...');
+            attemptOpenApp();
+        }, 500);
+        
+        // Also try to open on page focus (in case user returns to this tab)
+        window.addEventListener('focus', function() {
+            console.log('Page gained focus');
+            if (attemptCount < maxAttempts) {
+                attemptOpenApp();
+            }
+        });
+        
+        // Handle visibility change (when tab becomes visible)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && attemptCount < maxAttempts) {
+                console.log('Page became visible');
+                setTimeout(attemptOpenApp, 500);
+            }
+        });
+    </script>
+</body>
+</html>
+
