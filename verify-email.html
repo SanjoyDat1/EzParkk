@@ -422,8 +422,13 @@
 
         const content = document.getElementById('content');
 
+        // Handle password reset
+        if (mode === 'resetPassword' && oobCode) {
+            // Redirect to dedicated password reset page
+            window.location.href = `/reset-password.html?mode=resetPassword&oobCode=${oobCode}`;
+        }
         // Handle email verification
-        if (mode === 'verifyEmail' && oobCode) {
+        else if (mode === 'verifyEmail' && oobCode) {
             auth.applyActionCode(oobCode)
                 .then(() => {
                     // Email verified successfully
