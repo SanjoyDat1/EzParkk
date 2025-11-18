@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0066FF">
+    <title>Setup Complete - EzPark</title>
+    
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <!-- Preload fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F7F9FC;
+            color: #1A1A1A;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            animation: slideUp 0.4s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
+            padding: 48px 24px 64px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: white;
+            border-radius: 40px 40px 0 0;
+        }
+        
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            animation: scaleIn 0.5s ease-out 0.2s both;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .checkmark {
+            width: 48px;
+            height: 48px;
+            position: relative;
+        }
+        
+        .checkmark-circle {
+            stroke: #00C853;
+            stroke-width: 4;
+            fill: none;
+            stroke-dasharray: 200;
+            stroke-dashoffset: 200;
+            animation: checkmarkCircle 0.6s ease-in-out 0.3s forwards;
+        }
+        
+        .checkmark-check {
+            stroke: #00C853;
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 50;
+            stroke-dashoffset: 50;
+            animation: checkmarkCheck 0.4s ease-in-out 0.6s forwards;
+        }
+        
+        @keyframes checkmarkCircle {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes checkmarkCheck {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .content {
+            padding: 32px 24px 40px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #E8F5E9;
+            color: #00C853;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        
+        .status-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #00C853;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+        
+        .info-section {
+            background: #F7F9FC;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .info-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1A1A1A;
+        }
+        
+        .steps {
+            list-style: none;
+        }
+        
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: flex-start;
+        }
+        
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: #0066FF;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .step-content {
+            flex: 1;
+            padding-top: 4px;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #1A1A1A;
+            margin-bottom: 4px;
+            font-size: 15px;
+        }
+        
+        .step-desc {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .button {
+            display: block;
+            width: 100%;
+            padding: 18px 24px;
+            background: #0066FF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.2);
+            font-family: inherit;
+        }
+        
+        .button:hover {
+            background: #0052CC;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 102, 255, 0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            padding: 0 24px 24px;
+            text-align: center;
+        }
+        
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 13px;
+            padding: 12px 20px;
+            background: #F7F9FC;
+            border-radius: 100px;
+        }
+        
+        .security-icon {
+            width: 16px;
+            height: 16px;
+            color: #00C853;
+        }
+        
+        .note {
+            margin-top: 16px;
+            color: #999;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            body {
+                padding: 0;
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon-wrapper">
+                <svg class="checkmark" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="24"/>
+                    <path class="checkmark-check" d="M14 27l8 8 16-16"/>
+                </svg>
+            </div>
+            <h1>You're All Set!</h1>
+            <p>Payment account connected</p>
+        </div>
+        
+        <div class="content">
+            <div class="status-badge">Account Verified</div>
+            
+            <div class="info-section">
+                <h2>What's Next?</h2>
+                <ul class="steps">
+                    <li class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Return to EzPark</div>
+                            <div class="step-desc">Tap the button below when ready</div>
+                        </div>
+                    </li>
+                    <li class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Continue if needed</div>
+                            <div class="step-desc">You may need to complete 2-3 verification steps</div>
+                        </div>
+                    </li>
+                    <li class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Tap "Check Status"</div>
+                            <div class="step-desc">Once all steps are complete</div>
+                        </div>
+                    </li>
+                </ul>
+                <p style="margin-top: 16px; padding: 12px; background: #E3F2FD; border-radius: 8px; font-size: 13px; color: #1565C0;">
+                    💡 <strong>Note:</strong> Stripe requires multiple verification steps for security. You may return to the app and Safari 2-3 times - this is normal and required by law!
+                </p>
+            </div>
+            
+            <button class="button" id="openBtn">Return to EzPark</button>
+        </div>
+        
+        <div class="footer">
+            <div class="security-badge">
+                <svg class="security-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>Secured by Stripe</span>
+            </div>
+            <p class="note">Your payment information is encrypted and secure. EzPark takes 15% of each booking.</p>
+        </div>
+    </div>
+
+    <script>
+        const APP_SCHEME = 'ezparkk://stripe-return';
+        const btnEl = document.getElementById('openBtn');
+        
+        // IMPORTANT: NO AUTO-REDIRECT! Only open app when user clicks button
+        // This prevents infinite loops if the account isn't verified yet
+        
+        btnEl.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('User clicked Return to EzPark button');
+            
+            // Try to open the app
+            const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isIOS) {
+                window.location = APP_SCHEME;
+            } else {
+                window.location.href = APP_SCHEME;
+            }
+        });
+        
+        console.log('Stripe return page loaded - waiting for user to click button');
+    </script>
+</body>
+</html>

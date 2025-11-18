@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - EzPark</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background: #f6f9fc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 480px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+            padding: 32px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo-container {
+            margin-bottom: 16px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .content {
+            padding: 48px 40px;
+            text-align: center;
+        }
+
+        .status-container {
+            margin-bottom: 32px;
+        }
+
+        .icon-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 24px;
+        }
+
+        .icon-wrapper.loading {
+            background: #e3f2fd;
+        }
+
+        .icon-wrapper.success {
+            background: #e8f5e9;
+        }
+
+        .icon-wrapper.error {
+            background: #ffebee;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 102, 255, 0.1);
+            border-top-color: #0066ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .checkmark {
+            width: 40px;
+            height: 40px;
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke: #4caf50;
+            stroke-width: 3;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark-check {
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: #4caf50;
+            stroke-width: 3;
+            fill: none;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+        }
+
+        @keyframes stroke {
+            100% { stroke-dashoffset: 0; }
+        }
+
+        .error-icon {
+            width: 40px;
+            height: 40px;
+        }
+
+        .error-icon-circle {
+            stroke: #f44336;
+            stroke-width: 3;
+            fill: none;
+        }
+
+        .error-icon-cross {
+            stroke: #f44336;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .message.success {
+            color: #4caf50;
+            font-weight: 500;
+        }
+
+        .message.error {
+            color: #f44336;
+            font-weight: 500;
+        }
+
+        .submessage {
+            font-size: 14px;
+            color: #999999;
+            margin-top: 16px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            margin-top: 32px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 102, 255, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 102, 255, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 102, 255, 0.2);
+        }
+
+        .button-secondary {
+            background: #f6f9fc;
+            color: #0066ff;
+            box-shadow: none;
+            border: 1px solid #e0e0e0;
+        }
+
+        .button-secondary:hover {
+            background: #e8f2ff;
+            border-color: #0066ff;
+        }
+
+        .error-details {
+            background: #fff3e0;
+            border: 1px solid #ffb74d;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 24px 0;
+            text-align: left;
+        }
+
+        .error-details-title {
+            font-weight: 600;
+            color: #e65100;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .error-details p {
+            font-size: 13px;
+            color: #f57c00;
+            margin: 4px 0;
+            line-height: 1.5;
+        }
+
+        .footer {
+            background: #fafbfc;
+            padding: 24px 40px;
+            text-align: center;
+            border-top: 1px solid #e6e8eb;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            color: #8c8c8c;
+            margin-bottom: 8px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: #0066ff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: #0052cc;
+            text-decoration: underline;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e6e8eb;
+            margin: 32px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .header {
+                padding: 28px 24px;
+            }
+
+            .content {
+                padding: 40px 24px;
+            }
+
+            .footer {
+                padding: 20px 24px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .message {
+                font-size: 15px;
+            }
+        }
+
+        /* Loading dots animation */
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 4px;
+        }
+
+        .loading-dots span {
+            width: 4px;
+            height: 4px;
+            background: #999999;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7V11C2 16.55 6.84 21.74 12 23C17.16 21.74 22 16.55 22 11V7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 12L11 14L15 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+            <h1>EzPark</h1>
+        </div>
+
+        <div class="content" id="content">
+            <div class="status-container">
+                <div class="icon-wrapper loading">
+                    <div class="spinner"></div>
+                </div>
+                <h2>Verifying Your Email</h2>
+                <p class="message">Please wait while we confirm your email address<span class="loading-dots"><span></span><span></span><span></span></span></p>
+                <p class="submessage">This should only take a moment</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text">&copy; 2025 EzPark. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="https://ezparkk.com" class="footer-link">Visit Website</a>
+                <a href="mailto:support@ezparkk.com" class="footer-link">Contact Support</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBYQjqrvy8sQ94ts_8pKHELJezmGp-eIn4",
+            authDomain: "ezparkk-e4d3b.firebaseapp.com",
+            projectId: "ezparkk-e4d3b",
+            storageBucket: "ezparkk-e4d3b.firebasestorage.app",
+            messagingSenderId: "473703911799",
+            appId: "1:473703911799:ios:aca798a79c7a029509d172"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Get the action code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        const oobCode = urlParams.get('oobCode');
+
+        const content = document.getElementById('content');
+
+        // Handle password reset
+        if (mode === 'resetPassword' && oobCode) {
+            // Redirect to dedicated password reset page
+            window.location.href = `/reset-password.html?mode=resetPassword&oobCode=${oobCode}`;
+        }
+        // Handle email verification
+        else if (mode === 'verifyEmail' && oobCode) {
+            auth.applyActionCode(oobCode)
+                .then(() => {
+                    // Email verified successfully
+                    content.innerHTML = `
+                        <div class="status-container">
+                            <div class="icon-wrapper success">
+                                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                </svg>
+                            </div>
+                            <h2>Email Verified Successfully</h2>
+                            <p class="message success">Welcome to EzPark!</p>
+                            <p class="message">Your email has been confirmed. You can now access all features of your account.</p>
+                            <p class="submessage">Redirecting you back to the app...</p>
+                            <a href="ezparkk://email-verified" class="button">Open EzPark App</a>
+                        </div>
+                    `;
+
+                    // Try to redirect to the app
+                    setTimeout(() => {
+                        window.location.href = 'ezparkk://email-verified';
+                    }, 2000);
+                })
+                .catch((error) => {
+                    // Error verifying email
+                    let errorTitle = 'Verification Failed';
+                    let errorMessage = 'We encountered an issue while verifying your email address.';
+                    let errorDetails = error.message;
+
+                    if (error.code === 'auth/expired-action-code') {
+                        errorTitle = 'Link Expired';
+                        errorMessage = 'This verification link has expired. Please request a new verification email from the app.';
+                        errorDetails = 'Verification links are valid for 24 hours.';
+                    } else if (error.code === 'auth/invalid-action-code') {
+                        errorTitle = 'Invalid Link';
+                        errorMessage = 'This verification link is invalid or has already been used.';
+                        errorDetails = 'Please check your email for the latest verification link, or request a new one.';
+                    } else if (error.code === 'auth/user-disabled') {
+                        errorTitle = 'Account Disabled';
+                        errorMessage = 'Your account has been disabled.';
+                        errorDetails = 'Please contact our support team for assistance.';
+                    } else if (error.code === 'auth/user-not-found') {
+                        errorTitle = 'Account Not Found';
+                        errorMessage = 'The account associated with this verification link could not be found.';
+                        errorDetails = 'The account may have been deleted or the link is incorrect.';
+                    }
+
+                    content.innerHTML = `
+                        <div class="status-container">
+                            <div class="icon-wrapper error">
+                                <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                    <circle class="error-icon-circle" cx="26" cy="26" r="25"/>
+                                    <path class="error-icon-cross" d="M16 16L36 36M36 16L16 36"/>
+                                </svg>
+                            </div>
+                            <h2>${errorTitle}</h2>
+                            <p class="message error">${errorMessage}</p>
+                            <div class="error-details">
+                                <div class="error-details-title">Error Details</div>
+                                <p>${errorDetails}</p>
+                                <p><strong>Error Code:</strong> ${error.code || 'Unknown'}</p>
+                            </div>
+                            <p class="submessage">If you continue to experience issues, please contact our support team.</p>
+                            <a href="mailto:support@ezparkk.com" class="button">Contact Support</a>
+                            <a href="ezparkk://home" class="button button-secondary" style="margin-left: 12px;">Open App</a>
+                        </div>
+                    `;
+                });
+        } else {
+            // Invalid mode or missing oobCode
+            content.innerHTML = `
+                <div class="status-container">
+                    <div class="icon-wrapper error">
+                        <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle class="error-icon-circle" cx="26" cy="26" r="25"/>
+                            <path class="error-icon-cross" d="M16 16L36 36M36 16L16 36"/>
+                        </svg>
+                    </div>
+                    <h2>Invalid Verification Link</h2>
+                    <p class="message error">This link is invalid or incomplete.</p>
+                    <p class="message">Please check your email and click the correct verification link, or request a new one from the app.</p>
+                    <div class="divider"></div>
+                    <a href="ezparkk://home" class="button">Open EzPark App</a>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
