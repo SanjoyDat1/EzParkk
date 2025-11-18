@@ -91,21 +91,19 @@ export default function ParkingNetworkPanel() {
                 animate={{ 
                   opacity: 1, 
                   scale: 1, 
-                  y: 0,
-                  x: shouldReduceMotion ? 0 : [0, Math.sin(index) * 3, 0],
                   y: shouldReduceMotion ? 0 : [0, Math.cos(index) * 3, 0],
+                  x: shouldReduceMotion ? 0 : [0, Math.sin(index) * 3, 0],
                 }}
                 transition={{
                   opacity: { duration: 0.6, delay: card.delay },
                   scale: { duration: 0.6, delay: card.delay },
-                  y: { duration: 0.6, delay: card.delay },
-                  x: shouldReduceMotion ? {} : {
+                  y: shouldReduceMotion ? { duration: 0.6, delay: card.delay } : {
                     duration: 4 + index,
                     repeat: Infinity,
                     ease: 'easeInOut',
                     delay: index * 0.5,
                   },
-                  y: shouldReduceMotion ? {} : {
+                  x: shouldReduceMotion ? {} : {
                     duration: 4 + index,
                     repeat: Infinity,
                     ease: 'easeInOut',
