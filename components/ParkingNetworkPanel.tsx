@@ -54,14 +54,19 @@ export default function ParkingNetworkPanel() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative glass-strong rounded-[32px] p-8 md:p-12 w-full h-full border border-glass-border shadow-2xl"
         whileHover={shouldReduceMotion ? {} : { 
           rotateX: 2,
           rotateY: -2,
           scale: 1.02,
         }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ 
+          type: 'spring', 
+          stiffness: 300, 
+          damping: 30,
+          opacity: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+          scale: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
+        }}
       >
         {/* Background Grid Pattern */}
         <div 
