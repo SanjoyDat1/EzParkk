@@ -18,7 +18,7 @@ const demoSteps = [
     id: 'find-parking',
     title: 'Find Parking',
     subtitle: 'Search nearby hourly spots in just a few taps.',
-    imageSrc: '/phone_mockup.jpg',
+    imageSrc: '/find_parking_view.PNG',
     flow: 'Driver Flow',
   },
   {
