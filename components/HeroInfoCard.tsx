@@ -63,7 +63,7 @@ function TypingText({ text, delay = 0, typingSpeed = 50, shouldReduceMotion = fa
 }
 
 export default function HeroInfoCard() {
-  const shouldReduceMotion = useReducedMotion()
+  const shouldReduceMotion = useReducedMotion() ?? false
 
   const audiences = [
     {
