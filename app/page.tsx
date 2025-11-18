@@ -160,7 +160,7 @@ export default function Home() {
           >
             <div className="flex flex-col items-center gap-2 text-gray-400/25">
               <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2">
-                <Image src="/stripe.png" alt="Stripe payment processing logo" width={40} height={40} className="w-full h-full object-contain" />
+                <Image src="/stripe.png" alt="Stripe payment processing logo" width={40} height={40} className="w-full h-full object-contain" unoptimized />
               </div>
               <span className="text-xs font-medium">Stripe</span>
             </div>
@@ -199,7 +199,7 @@ export default function Home() {
           >
             <div className="flex flex-col items-center gap-2 text-gray-400/25">
               <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2">
-                <Image src="/google_maps.png" alt="Google Maps integration logo" width={40} height={40} className="w-full h-full object-contain" />
+                <Image src="/google_maps.png" alt="Google Maps integration logo" width={40} height={40} className="w-full h-full object-contain" unoptimized />
               </div>
               <span className="text-xs font-medium">Google Maps</span>
             </div>
@@ -397,7 +397,7 @@ export default function Home() {
             >
               <div className="flex flex-col items-center gap-1.5 text-gray-400/20">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg">
-                  <Image src={tech.logo} alt={tech.name} width={32} height={32} className="w-full h-full object-contain" />
+                  <Image src={tech.logo} alt={tech.name} width={32} height={32} className="w-full h-full object-contain" unoptimized={tech.name === 'Stripe' || tech.name === 'Google Maps'} />
                 </div>
                 <span className="text-[10px] font-medium">{tech.name}</span>
               </div>
@@ -480,7 +480,7 @@ export default function Home() {
             >
               <div className="flex flex-col items-center gap-1.5 text-gray-400/20">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg">
-                  <Image src={tech.logo} alt={tech.name} width={32} height={32} className="w-full h-full object-contain" />
+                  <Image src={tech.logo} alt={tech.name} width={32} height={32} className="w-full h-full object-contain" unoptimized={tech.name === 'Stripe' || tech.name === 'Google Maps'} />
                 </div>
                 <span className="text-[10px] font-medium">{tech.name}</span>
               </div>
@@ -602,7 +602,7 @@ export default function Home() {
             >
               <div className="flex flex-col items-center gap-2 text-gray-400/25">
                 <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg">
-                  <Image src={tech.logo} alt={tech.name} width={40} height={40} className="w-full h-full object-contain" />
+                  <Image src={tech.logo} alt={tech.name} width={40} height={40} className="w-full h-full object-contain" unoptimized={tech.name === 'Stripe' || tech.name === 'Google Maps'} />
                 </div>
                 <span className="text-xs font-medium">{tech.name}</span>
               </div>

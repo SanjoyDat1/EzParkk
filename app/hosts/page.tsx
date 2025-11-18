@@ -105,7 +105,7 @@ export default function Hosts() {
             >
               <div className="flex flex-col items-center gap-1.5 text-gray-400/20">
                 <div className="w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg">
-                  <Image src={tech.logo} alt={`${tech.name} technology logo`} width={32} height={32} className="w-full h-full object-contain" />
+                  <Image src={tech.logo} alt={`${tech.name} technology logo`} width={32} height={32} className="w-full h-full object-contain" unoptimized={tech.name === 'Stripe' || tech.name === 'Google Maps'} />
                 </div>
                 <span className="text-[10px] font-medium">{tech.name}</span>
               </div>

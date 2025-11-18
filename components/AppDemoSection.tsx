@@ -238,6 +238,7 @@ export default function AppDemoSection() {
                           fill
                           className="object-contain"
                           priority={activeIndex === 0}
+                          unoptimized={activeStep.imageSrc.endsWith('.PNG')}
                         />
                       </motion.div>
                     </AnimatePresence>

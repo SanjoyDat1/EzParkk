@@ -224,7 +224,7 @@ export default function Features() {
             >
               <div className="flex flex-col items-center gap-2 text-gray-400/25">
                 <div className="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-2 shadow-lg">
-                  <Image src={tech.logo} alt={`${tech.name} technology logo`} width={40} height={40} className="w-full h-full object-contain" />
+                  <Image src={tech.logo} alt={`${tech.name} technology logo`} width={40} height={40} className="w-full h-full object-contain" unoptimized={tech.name === 'Stripe' || tech.name === 'Google Maps'} />
                 </div>
                 <span className="text-xs font-medium">{tech.name}</span>
               </div>
@@ -281,7 +281,8 @@ export default function Features() {
                       alt={`${tech.name} ${tech.description.toLowerCase()} technology logo`} 
                       width={tech.name === 'Stripe' ? 56 : tech.name === 'Google Maps' ? 56 : 48} 
                       height={tech.name === 'Stripe' ? 56 : tech.name === 'Google Maps' ? 56 : 48} 
-                      className={tech.name === 'Stripe' ? 'w-full h-full object-contain' : 'w-full h-full object-contain'} 
+                      className={tech.name === 'Stripe' ? 'w-full h-full object-contain' : 'w-full h-full object-contain'}
+                      unoptimized={tech.name === 'Stripe' || tech.name === 'Google Maps'}
                     />
                   </div>
                   <h3 className="font-display text-lg font-bold mb-1">{tech.name}</h3>

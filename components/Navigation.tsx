@@ -50,6 +50,7 @@ export default function Navigation() {
                 fill
                 className="object-contain"
                 priority
+                unoptimized
               />
             </div>
             <span className="font-display text-2xl font-bold text-white">
