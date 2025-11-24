@@ -9,3 +9,9 @@
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
 
+# Rewrite rules for static HTML files
+[[redirects]]
+  from = "/verify-email"
+  to = "/verify-email.html"
+  status = 200
+
