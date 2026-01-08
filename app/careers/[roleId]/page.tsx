@@ -125,10 +125,4 @@ export default function RoleApplicationPage() {
   )
 }
 
-// Generate static params for all roles
-export async function generateStaticParams() {
-  return openRoles.map((role) => ({
-    roleId: role.id,
-  }))
-}
 
