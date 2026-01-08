@@ -14,7 +14,8 @@ const openRoles = [
     location: 'Remote / Los Angeles, CA',
     type: 'Internship',
     icon: Code,
-    description: 'Join as a software engineering intern and help build the core platform. You\'ll work across our tech stack including web, mobile, and backend infrastructure. Learn from experienced engineers while making real impact on a product that solves real problems.',
+    description:
+      "Join as a software engineering intern and help build the core EzParkk platform from the ground up. You'll touch real product features across our Next.js web app, native mobile experiences, and Firebase/Node backend infrastructure. This is a hands-on role where you'll ship production-quality code, participate in design discussions, and see how a zero-to-one startup operates day to day.",
     requirements: [
       'Currently pursuing a degree in Computer Science or related field',
       'Experience with any programming language (JavaScript, Python, Java, Swift, etc.)',
@@ -30,7 +31,8 @@ const openRoles = [
     location: 'Remote / Los Angeles, CA',
     type: 'Internship',
     icon: Megaphone,
-    description: 'Help drive user acquisition and growth for EzParkk. You\'ll work on marketing campaigns, social media, content creation, and help build our brand in the parking and mobility space.',
+    description:
+      'Help drive user acquisition and growth for EzParkk. You\'ll create social content (Instagram, TikTok, and more), test growth experiments, support campus / city activations, and help build a modern brand in the parking and mobility space. Ideal for someone who lives on social, understands trends, and wants to learn how growth works at an early-stage startup.',
     requirements: [
       'Currently pursuing a degree in Marketing, Communications, or related field',
       'Interest in digital marketing channels (social, email, paid ads)',
@@ -66,6 +68,11 @@ export default function Careers() {
     coverLetter: '',
     linkedIn: '',
     portfolio: '',
+    instagram: '',
+    tiktok: '',
+    location: '',
+    availability: '',
+    heardAboutUs: '',
   })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -113,6 +120,11 @@ export default function Careers() {
         coverLetter: formData.coverLetter!,
         linkedIn: formData.linkedIn || '',
         portfolio: formData.portfolio || '',
+        instagram: formData.instagram || '',
+        tiktok: formData.tiktok || '',
+        location: formData.location || '',
+        availability: formData.availability || '',
+        heardAboutUs: formData.heardAboutUs || '',
       })
       setSubmitted(true)
       setFormData({
@@ -123,6 +135,11 @@ export default function Careers() {
         coverLetter: '',
         linkedIn: '',
         portfolio: '',
+        instagram: '',
+        tiktok: '',
+        location: '',
+        availability: '',
+        heardAboutUs: '',
       })
       setResumeFile(null)
       setResumeFileName('')
@@ -287,7 +304,7 @@ export default function Careers() {
                     Apply for {selectedRoleData?.title}
                   </h2>
                   <p className="text-gray-400">
-                    We'd love to hear from you. Fill out the form below to get started.
+                    We keep our intern cohort intentionally small so you can work directly with the founder and core team. Share as much detail as you can below so we can understand your background, interests, and how you like to build or create online.
                   </p>
                 </div>
                 <button
@@ -409,6 +426,100 @@ export default function Careers() {
                       placeholder="https://yourportfolio.com"
                     />
                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="instagram"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Instagram
+                    </label>
+                    <input
+                      type="text"
+                      id="instagram"
+                      name="instagram"
+                      value={formData.instagram}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="@handle"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="tiktok"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      TikTok
+                    </label>
+                    <input
+                      type="text"
+                      id="tiktok"
+                      name="tiktok"
+                      value={formData.tiktok}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="@handle"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="location"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Current City / Time Zone
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="e.g. Los Angeles (PST)"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="availability"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Availability & Weekly Hours
+                    </label>
+                    <input
+                      type="text"
+                      id="availability"
+                      name="availability"
+                      value={formData.availability}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="e.g. 10–15 hrs/week, Spring 2026"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="heardAboutUs"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    How did you hear about EzParkk?
+                  </label>
+                  <input
+                    type="text"
+                    id="heardAboutUs"
+                    name="heardAboutUs"
+                    value={formData.heardAboutUs}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                    placeholder="Friend, TikTok, Instagram, campus, etc."
+                  />
                 </div>
 
                 <div>
@@ -583,7 +694,7 @@ export default function Careers() {
                     General Application
                   </h2>
                   <p className="text-gray-400">
-                    We'd love to hear from you. Fill out the form below and we'll keep you in mind for future opportunities.
+                    We'd love to hear from you. Share details about your background, interests, availability, and social presence so we can match you with future roles or projects as EzParkk grows.
                   </p>
                 </div>
                 <button
@@ -705,6 +816,100 @@ export default function Careers() {
                       placeholder="https://yourportfolio.com"
                     />
                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="instagram"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Instagram
+                    </label>
+                    <input
+                      type="text"
+                      id="instagram"
+                      name="instagram"
+                      value={formData.instagram}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="@handle"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="tiktok"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      TikTok
+                    </label>
+                    <input
+                      type="text"
+                      id="tiktok"
+                      name="tiktok"
+                      value={formData.tiktok}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="@handle"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label
+                      htmlFor="location"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Current City / Time Zone
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="e.g. Los Angeles (PST)"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="availability"
+                      className="block text-sm font-medium text-gray-300 mb-2"
+                    >
+                      Availability & Weekly Hours
+                    </label>
+                    <input
+                      type="text"
+                      id="availability"
+                      name="availability"
+                      value={formData.availability}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                      placeholder="e.g. 10–15 hrs/week, Spring 2026"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="heardAboutUs"
+                    className="block text-sm font-medium text-gray-300 mb-2"
+                  >
+                    How did you hear about EzParkk?
+                  </label>
+                  <input
+                    type="text"
+                    id="heardAboutUs"
+                    name="heardAboutUs"
+                    value={formData.heardAboutUs}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
+                    placeholder="Friend, TikTok, Instagram, campus, etc."
+                  />
                 </div>
 
                 <div>

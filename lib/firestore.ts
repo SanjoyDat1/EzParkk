@@ -19,6 +19,11 @@ export interface JobApplication {
   coverLetter: string
   linkedIn?: string
   portfolio?: string
+  instagram?: string
+  tiktok?: string
+  location?: string
+  availability?: string
+  heardAboutUs?: string
   createdAt?: any
 }
 
