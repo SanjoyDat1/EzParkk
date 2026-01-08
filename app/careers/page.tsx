@@ -2,60 +2,11 @@
 
 import { useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { Code, Megaphone, Briefcase, ArrowRight, MapPin, Clock, Send, CheckCircle, AlertCircle, Loader2, X, FileText, Upload } from 'lucide-react'
+import { ArrowRight, MapPin, Send, CheckCircle, AlertCircle, Loader2, X, FileText, Upload } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { submitJobApplication, JobApplication, uploadResume } from '@/lib/firestore'
-
-const openRoles = [
-  {
-    id: 'software-engineering-intern',
-    title: 'Software Engineering Intern',
-    department: 'Engineering',
-    location: 'Remote / Los Angeles, CA',
-    type: 'Internship',
-    icon: Code,
-    description:
-      "Join as a software engineering intern and help build the core EzParkk platform from the ground up. You'll touch real product features across our Next.js web app, native mobile experiences, and Firebase/Node backend infrastructure. This is a hands-on role where you'll ship production-quality code, participate in design discussions, and see how a zero-to-one startup operates day to day.",
-    requirements: [
-      'Currently pursuing a degree in Computer Science or related field',
-      'Experience with any programming language (JavaScript, Python, Java, Swift, etc.)',
-      'Interest in full-stack development, mobile apps, or backend systems',
-      'Strong problem-solving and communication skills',
-      'Passion for building products that solve real problems',
-    ],
-  },
-  {
-    id: 'marketing-intern',
-    title: 'Marketing Intern',
-    department: 'Marketing',
-    location: 'Remote / Los Angeles, CA',
-    type: 'Internship',
-    icon: Megaphone,
-    description:
-      'Help drive user acquisition and growth for EzParkk. You\'ll create social content (Instagram, TikTok, and more), test growth experiments, support campus / city activations, and help build a modern brand in the parking and mobility space. Ideal for someone who lives on social, understands trends, and wants to learn how growth works at an early-stage startup.',
-    requirements: [
-      'Currently pursuing a degree in Marketing, Communications, or related field',
-      'Interest in digital marketing channels (social, email, paid ads)',
-      'Creative thinker with strong writing skills',
-      'Eager to learn and contribute to growth initiatives',
-    ],
-  },
-  {
-    id: 'operations-intern',
-    title: 'Operations Intern',
-    department: 'Operations',
-    location: 'Los Angeles, CA / Newport Beach, CA',
-    type: 'Internship',
-    icon: Briefcase,
-    description: 'Help scale EzParkk across California. You\'ll work on city partnerships, host onboarding, customer support, and learn how to run operations at a fast-growing startup.',
-    requirements: [
-      'Currently pursuing a degree in Business, Operations, or related field',
-      'Strong organizational and communication skills',
-      'Interest in partnerships and business development',
-      'Detail-oriented with excellent problem-solving abilities',
-    ],
-  },
-]
+import { openRoles } from '@/lib/roles'
 
 export default function Careers() {
   const { scrollY } = useScroll()
@@ -184,7 +135,6 @@ export default function Careers() {
     })
   }
 
-  const selectedRoleData = openRoles.find((role) => role.id === selectedRole)
 
   return (
     <div className="min-h-screen pt-20">
@@ -244,412 +194,52 @@ export default function Careers() {
             {openRoles.map((role, index) => {
               const Icon = role.icon
               return (
-                <motion.div
+                <Link
                   key={role.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className={`relative glass rounded-3xl p-8 hover:scale-105 transition-transform cursor-pointer ${
-                    selectedRole === role.id ? 'ring-2 ring-cyan' : ''
-                  }`}
-                  onClick={() => handleRoleSelect(role.id)}
+                  href={`/careers/${role.id}`}
+                  className="block"
                 >
-                  <div className="absolute top-4 right-4 w-20 h-20 overlay-shape opacity-20" />
-                  <Icon className="w-16 h-16 text-cyan mb-6" />
-                  <h3 className="font-display text-2xl font-bold mb-2">
-                    {role.title}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-xs px-3 py-1 bg-cyan/20 text-cyan rounded-full">
-                      {role.department}
-                    </span>
-                    <span className="text-xs px-3 py-1 bg-purple/20 text-purple rounded-full">
-                      {role.type}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {role.location}
+                  <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: index * 0.1 }}
+                    className="relative glass rounded-3xl p-8 hover:scale-105 transition-transform cursor-pointer"
+                  >
+                    <div className="absolute top-4 right-4 w-20 h-20 overlay-shape opacity-20" />
+                    <Icon className="w-16 h-16 text-cyan mb-6" />
+                    <h3 className="font-display text-2xl font-bold mb-2">
+                      {role.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <span className="text-xs px-3 py-1 bg-cyan/20 text-cyan rounded-full">
+                        {role.department}
+                      </span>
+                      <span className="text-xs px-3 py-1 bg-purple/20 text-purple rounded-full">
+                        {role.type}
+                      </span>
                     </div>
-                  </div>
-                  <p className="text-gray-300 leading-relaxed mb-4">
-                    {role.description}
-                  </p>
-                  <div className="flex items-center text-cyan font-medium text-sm group">
-                    Apply Now
-                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </motion.div>
+                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {role.location}
+                      </div>
+                    </div>
+                    <p className="text-gray-300 leading-relaxed mb-4">
+                      {role.description}
+                    </p>
+                    <div className="flex items-center text-cyan font-medium text-sm group">
+                      Apply Now
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </motion.div>
+                </Link>
               )
             })}
           </div>
         </div>
       </section>
 
-      {/* Application Form Section */}
-      {selectedRole && selectedRole !== 'general-application' && (
-        <section className="relative py-20 border-y border-glass-border">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="glass-strong rounded-3xl p-8 md:p-12"
-            >
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="font-display text-3xl font-bold mb-2">
-                    Apply for {selectedRoleData?.title}
-                  </h2>
-                  <p className="text-gray-400">
-                    We keep our intern cohort intentionally small so you can work directly with the founder and core team. Share as much detail as you can below so we can understand your background, interests, and how you like to build or create online.
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedRole(null)
-                    setFormData({
-                      name: '',
-                      email: '',
-                      phone: '',
-                      role: '',
-                      coverLetter: '',
-                      linkedIn: '',
-                      portfolio: '',
-                    })
-                    setResumeFile(null)
-                    setResumeFileName('')
-                    setError(null)
-                    setSubmitted(false)
-                  }}
-                  className="p-2 text-gray-400 hover:text-white transition-colors"
-                  aria-label="Close form"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="John Doe"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="john@example.com"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-300 mb-2"
-                  >
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="linkedIn"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      LinkedIn Profile
-                    </label>
-                    <input
-                      type="url"
-                      id="linkedIn"
-                      name="linkedIn"
-                      value={formData.linkedIn}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="https://linkedin.com/in/yourname"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="portfolio"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      Portfolio / Website
-                    </label>
-                    <input
-                      type="url"
-                      id="portfolio"
-                      name="portfolio"
-                      value={formData.portfolio}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="https://yourportfolio.com"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="instagram"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      Instagram
-                    </label>
-                    <input
-                      type="text"
-                      id="instagram"
-                      name="instagram"
-                      value={formData.instagram}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="@handle"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="tiktok"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      TikTok
-                    </label>
-                    <input
-                      type="text"
-                      id="tiktok"
-                      name="tiktok"
-                      value={formData.tiktok}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="@handle"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="location"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      Current City / Time Zone
-                    </label>
-                    <input
-                      type="text"
-                      id="location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="e.g. Los Angeles (PST)"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="availability"
-                      className="block text-sm font-medium text-gray-300 mb-2"
-                    >
-                      Availability & Weekly Hours
-                    </label>
-                    <input
-                      type="text"
-                      id="availability"
-                      name="availability"
-                      value={formData.availability}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                      placeholder="e.g. 10–15 hrs/week, Spring 2026"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="heardAboutUs"
-                    className="block text-sm font-medium text-gray-300 mb-2"
-                  >
-                    How did you hear about EzParkk?
-                  </label>
-                  <input
-                    type="text"
-                    id="heardAboutUs"
-                    name="heardAboutUs"
-                    value={formData.heardAboutUs}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all"
-                    placeholder="Friend, TikTok, Instagram, campus, etc."
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="resume"
-                    className="block text-sm font-medium text-gray-300 mb-2"
-                  >
-                    Resume (PDF or Word) *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="resume"
-                      name="resume"
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleFileChange}
-                      required
-                      className="hidden"
-                    />
-                    <label
-                      htmlFor="resume"
-                      className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white cursor-pointer hover:border-cyan hover:bg-dark-bg/70 transition-all"
-                    >
-                      {resumeFileName ? (
-                        <>
-                          <FileText className="w-5 h-5 text-cyan" />
-                          <span className="text-sm text-gray-300 truncate flex-1">{resumeFileName}</span>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setResumeFile(null)
-                              setResumeFileName('')
-                              const input = document.getElementById('resume') as HTMLInputElement
-                              if (input) input.value = ''
-                            }}
-                            className="text-gray-400 hover:text-red-400 transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-5 h-5 text-gray-400" />
-                          <span className="text-sm text-gray-400">Click to upload resume (PDF, DOC, DOCX - Max 5MB)</span>
-                        </>
-                      )}
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Accepted formats: PDF, DOC, DOCX. Maximum file size: 5MB</p>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="coverLetter"
-                    className="block text-sm font-medium text-gray-300 mb-2"
-                  >
-                    Cover Letter / Why EzParkk? *
-                  </label>
-                  <textarea
-                    id="coverLetter"
-                    name="coverLetter"
-                    value={formData.coverLetter}
-                    onChange={handleChange}
-                    required
-                    rows={6}
-                    className="w-full px-4 py-3 bg-dark-bg/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-cyan focus:ring-2 focus:ring-cyan/20 transition-all resize-none"
-                    placeholder="Tell us why you're interested in this role and what you'd bring to EzParkk..."
-                  />
-                </div>
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-center gap-3"
-                  >
-                    <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                    <p className="text-red-400 text-sm">{error}</p>
-                  </motion.div>
-                )}
-
-                {submitted && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-green-500/10 border border-green-500/50 rounded-lg p-4 flex items-center gap-3"
-                  >
-                    <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <p className="text-green-400 text-sm">
-                      Thank you! Your application has been submitted. We'll review it and get back to you soon.
-                    </p>
-                  </motion.div>
-                )}
-
-                <motion.button
-                  type="submit"
-                  disabled={loading || submitted}
-                  whileHover={!loading && !submitted ? { scale: 1.02 } : {}}
-                  whileTap={!loading && !submitted ? { scale: 0.98 } : {}}
-                  className={`w-full px-8 py-4 rounded-full font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
-                    submitted
-                      ? 'bg-green-500 text-white cursor-not-allowed'
-                      : loading
-                      ? 'bg-cyan/70 text-white cursor-not-allowed'
-                      : 'bg-cyan text-white hover:bg-cyan-dark'
-                  }`}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Submitting...</span>
-                    </>
-                  ) : submitted ? (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      <span>Application Submitted!</span>
-                    </>
-                  ) : (
-                    <>
-                      Submit Application
-                      <Send className="w-5 h-5" />
-                    </>
-                  )}
-                </motion.button>
-              </form>
-            </motion.div>
-          </div>
-        </section>
-      )}
 
       {/* CTA Section */}
       <section className="relative py-20">
