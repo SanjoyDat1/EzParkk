@@ -231,7 +231,7 @@ export default function Home() {
                   animate={mounted ? { opacity: 1, x: 0 } : {}}
                   transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  Launching in 2 Weeks
+                  Now Available on iOS
                 </motion.span>
                 <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-[1.1] mb-3 sm:mb-4 lg:mb-5">
                   <motion.span
@@ -302,13 +302,17 @@ export default function Home() {
                 className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-3 sm:pt-4 lg:pt-6 w-full px-2 sm:px-0"
               >
                 <motion.a
-                  href="/contact"
+                  href="https://apps.apple.com/us/app/ezparkk/id6757027658"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group w-full sm:w-auto px-5 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-cyan text-dark-bg rounded-full font-semibold text-sm sm:text-base md:text-lg hover:bg-cyan/90 transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2 shadow-lg shadow-cyan/20"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  Join Waitlist
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  </svg>
+                  Download on App Store
                 </motion.a>
                 <motion.button
                   onClick={() => {
@@ -413,8 +417,8 @@ export default function Home() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {[
-              { label: 'Weeks to Launch', value: '2', icon: TrendingUp },
-              { label: 'Waitlist Signups', value: '5K+', icon: Users },
+              { label: 'Available Now', value: 'iOS', icon: Smartphone },
+              { label: 'Active Users', value: 'Growing', icon: Users },
               { label: 'Launch State', value: 'CA', icon: MapPin },
             ].map((stat, index) => (
               <motion.div
@@ -433,6 +437,153 @@ export default function Home() {
               </motion.div>
             ))}
           </motion.div>
+        </div>
+      </section>
+
+      {/* iOS App Launch Section */}
+      <section className="relative py-32 overflow-hidden border-y border-glass-border">
+        <div className="absolute inset-0 bg-gradient-to-br from-cyan/5 via-purple/5 to-transparent" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-6"
+            >
+              <motion.span 
+                className="text-box inline-block"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+              >
+                Now Live on iOS
+              </motion.span>
+              
+              <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold">
+                The parking revolution{' '}
+                <span className="text-cyan">(starts here)</span>
+              </h2>
+              
+              <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+                EzParkk is now available on the App Store. Download the app to find affordable parking spots instantly or start earning passive income from your unused driveway.
+              </p>
+
+              {/* Key Features */}
+              <div className="space-y-4 pt-4">
+                {[
+                  { icon: Zap, text: 'Instant booking in one tap' },
+                  { icon: Shield, text: 'Secure payments via Stripe' },
+                  { icon: MapPin, text: 'Precise navigation to your spot' },
+                  { icon: TrendingUp, text: 'Earn up to $350/month per spot' },
+                ].map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-cyan/20 flex items-center justify-center flex-shrink-0">
+                      <feature.icon className="w-5 h-5 text-cyan" />
+                    </div>
+                    <span className="text-gray-300">{feature.text}</span>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* App Store Download Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="pt-6"
+              >
+                <motion.a
+                  href="https://apps.apple.com/us/app/ezparkk/id6757027658"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 px-8 py-4 bg-black text-white rounded-2xl font-semibold text-lg hover:bg-gray-900 transition-all duration-300 hover:scale-[1.02] shadow-xl"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                  </svg>
+                  <div className="flex flex-col items-start">
+                    <span className="text-xs text-gray-400 leading-tight">Download on the</span>
+                    <span className="text-xl leading-tight">App Store</span>
+                  </div>
+                </motion.a>
+              </motion.div>
+
+              {/* App Info */}
+              <div className="flex flex-wrap gap-6 pt-4 text-sm text-gray-400">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-300">Free</span>
+                  <span>•</span>
+                  <span>64.1 MB</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>Requires iOS 18.2+</span>
+                  <span>•</span>
+                  <span>iPhone & iPad</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right: Phone Mockup */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="relative flex items-center justify-center"
+            >
+              <div className="relative w-full max-w-sm mx-auto">
+                {/* Phone Frame */}
+                <div className="relative aspect-[9/19.5] rounded-[3rem] bg-gradient-to-br from-gray-900 to-black p-3 shadow-2xl">
+                  <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden">
+                    <Image
+                      src="/phone_mockup.jpg"
+                      alt="EzParkk iOS app screenshot showing parking search interface"
+                      fill
+                      className="object-cover"
+                      priority
+                      unoptimized
+                    />
+                  </div>
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10" />
+                </div>
+                
+                {/* Floating Badge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="absolute -bottom-6 left-1/2 -translate-x-1/2 glass-strong rounded-2xl px-6 py-4 shadow-xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan to-purple flex items-center justify-center">
+                      <Smartphone className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white">Available Now</div>
+                      <div className="text-xs text-gray-400">iOS App Store</div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
