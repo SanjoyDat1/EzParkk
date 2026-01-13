@@ -33,14 +33,31 @@ export const db: Firestore = getFirestore(app)
 let storage: FirebaseStorage
 try {
   if (firebaseConfig.storageBucket) {
-    // Normalize bucket name - remove gs:// prefix if present, then add it back
+    // Normalize bucket name - remove gs:// prefix if present
     const bucketName = firebaseConfig.storageBucket.replace(/^gs:\/\//, '')
-    // Explicitly pass the bucket URL to ensure it's set
-    storage = getStorage(app, `gs://${bucketName}`)
+    console.log('Initializing Firebase Storage with bucket:', bucketName)
+    
+    // For newer .firebasestorage.app buckets, use the bucket name directly
+    // For older .appspot.com buckets, Firebase handles both formats
+    if (bucketName.includes('.firebasestorage.app')) {
+      // Newer format: use bucket name directly (Firebase SDK handles it)
+      storage = getStorage(app, bucketName)
+    } else {
+      // Older format: can use with or without gs:// prefix
+      storage = getStorage(app, `gs://${bucketName}`)
+    }
   } else if (firebaseConfig.projectId) {
-    // Fallback: construct bucket name from project ID
-    console.warn('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET not set, using default bucket from project ID')
-    storage = getStorage(app, `gs://${firebaseConfig.projectId}.appspot.com`)
+    // Fallback: construct bucket name from project ID (try newer format first)
+    console.warn('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET not set, trying default buckets')
+    try {
+      storage = getStorage(app, `${firebaseConfig.projectId}.firebasestorage.app`)
+    } catch (e) {
+      try {
+        storage = getStorage(app, `gs://${firebaseConfig.projectId}.appspot.com`)
+      } catch (e2) {
+        storage = getStorage(app)
+      }
+    }
   } else {
     // Last resort: use default bucket (will fail if Storage not enabled)
     console.error('Firebase Storage bucket cannot be determined. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET')
@@ -49,8 +66,8 @@ try {
 } catch (error: any) {
   console.error('Failed to initialize Firebase Storage:', error)
   const errorMessage = firebaseConfig.storageBucket 
-    ? `Firebase Storage initialization failed. Error: ${error.message}`
-    : 'Firebase Storage is not configured. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in your .env.local file (format: your-project-id.appspot.com)'
+    ? `Firebase Storage initialization failed. Error: ${error.message}. Please verify Storage is enabled in Firebase Console and the bucket name is correct.`
+    : 'Firebase Storage is not configured. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in your .env.local file (format: your-project-id.appspot.com or your-project-id.firebasestorage.app)'
   throw new Error(errorMessage)
 }
 
