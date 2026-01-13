@@ -117,7 +117,9 @@ export async function uploadResume(file: File, applicantEmail: string): Promise<
     })
     
     // Provide more specific error messages
-    if (error.code === 'storage/unauthorized') {
+    if (error.code === 'storage/no-default-bucket') {
+      throw new Error('Firebase Storage bucket is not configured. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in your .env.local file. Format: your-project-id.appspot.com')
+    } else if (error.code === 'storage/unauthorized') {
       throw new Error('Storage access denied. Please check Firebase Storage security rules in Firebase Console.')
     } else if (error.code === 'storage/canceled') {
       throw new Error('Upload was canceled. Please try again.')

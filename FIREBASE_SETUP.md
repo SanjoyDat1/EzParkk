@@ -156,6 +156,39 @@ service firebase.storage {
 - Check that `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` is set correctly in `.env.local`
 - Verify the Storage bucket location matches your Firestore location
 
+### "No default bucket found" or "storage/no-default-bucket" error
+This error means Firebase Storage bucket is not configured. Follow these steps:
+
+1. **Check your `.env.local` file** - Make sure you have:
+   ```env
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+   ```
+   Replace `your-project-id` with your actual Firebase project ID.
+
+2. **Get your Storage Bucket name from Firebase Console:**
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Select your project
+   - Go to **Storage** in the left sidebar
+   - Look at the URL or the bucket name shown at the top
+   - It should be in the format: `your-project-id.appspot.com`
+
+3. **If Storage is not enabled:**
+   - Go to **Storage** in Firebase Console
+   - Click **Get started**
+   - Choose **Start in test mode** or **Start in production mode**
+   - Select a location (same as your Firestore location is recommended)
+   - Click **Done**
+
+4. **After updating `.env.local`:**
+   - Restart your development server (`npm run dev`)
+   - For production (Netlify), add the environment variable in Netlify dashboard:
+     - Go to Site settings → Environment variables
+     - Add `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` with value `your-project-id.appspot.com`
+
+5. **Verify the bucket name format:**
+   - Correct: `your-project-id.appspot.com` (no `gs://` prefix in env var)
+   - The code will automatically add `gs://` prefix when needed
+
 ### "This email is already on the waitlist!"
 - This is expected behavior - the form prevents duplicate email submissions
 - The email already exists in your Firestore database
