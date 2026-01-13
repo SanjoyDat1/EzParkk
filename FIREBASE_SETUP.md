@@ -73,9 +73,16 @@ service cloud.firestore {
       allow read: if false; // Disable reads from client for security
       
       // Allow writes: anyone can submit job applications
+      // IMPORTANT: This rule must allow 'create' for the form to work
       allow create: if request.resource.data.keys().hasAll(['name', 'email', 'role', 'coverLetter'])
                     && request.resource.data.email is string
-                    && request.resource.data.email.matches('.*@.*\\..*');
+                    && request.resource.data.email.matches('.*@.*\\..*')
+                    && request.resource.data.name is string
+                    && request.resource.data.role is string
+                    && request.resource.data.coverLetter is string;
+      
+      // Disable update and delete from client
+      allow update, delete: if false;
     }
   }
 }

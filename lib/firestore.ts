@@ -189,22 +189,39 @@ export async function submitJobApplication(data: JobApplication): Promise<string
     // Add document with timestamp
     // NOTE: If this fails, check the Network tab for a failed request to firestore.googleapis.com
     // This usually indicates a Permissions/Rules issue in Firebase Console
-    const docRef = await addDoc(collection(db, 'jobApplications'), sanitizedData)
+    
+    // Add timeout to prevent hanging indefinitely (30 seconds)
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('Firestore request timed out after 30 seconds. This usually means Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console.'))
+      }, 30000)
+    })
 
+    console.log('Calling addDoc...')
+    const addDocPromise = addDoc(collection(db, 'jobApplications'), sanitizedData)
+    
+    // Race between the addDoc and timeout
+    const docRef = await Promise.race([addDocPromise, timeoutPromise])
+    
     console.log('Successfully added document with ID:', docRef.id)
     return docRef.id
   } catch (error: any) {
     // Log detailed error information for debugging
-    console.error('Error submitting job application to Firestore:', error)
+    console.error('❌ Error submitting job application to Firestore:', error)
     console.error('Error code:', error.code)
     console.error('Error message:', error.message)
     console.error('Error stack:', error.stack)
+    console.error('Full error object:', JSON.stringify(error, null, 2))
     
-    // Check Network tab for failed requests to firestore.googleapis.com if you see permission errors
+    // IMPORTANT: Check the Network tab in Chrome DevTools for failed requests to firestore.googleapis.com
+    // Look for requests with status 403 (Forbidden) or 400 (Bad Request)
+    // This will tell you exactly what Firestore security rule is blocking the write
     
     // Provide more specific error messages based on Firestore error codes
     if (error.code === 'permission-denied') {
-      throw new Error('Permission denied. Please check Firestore security rules in Firebase Console. The "jobApplications" collection must allow writes.')
+      const detailedError = 'Permission denied. Your Firestore security rules are blocking this write. Please check Firebase Console → Firestore Database → Rules and ensure the "jobApplications" collection allows writes. Example rule: allow create: if request.resource.data.keys().hasAll([\'name\', \'email\', \'role\', \'coverLetter\']);'
+      console.error('🔒 PERMISSION DENIED - Check Firestore Rules:', detailedError)
+      throw new Error(detailedError)
     } else if (error.code === 'unavailable') {
       throw new Error('Firestore service temporarily unavailable. Please try again in a moment.')
     } else if (error.code === 'failed-precondition') {
@@ -213,10 +230,13 @@ export async function submitJobApplication(data: JobApplication): Promise<string
       throw new Error('Invalid data format. Please check all fields are properly filled.')
     } else if (error.code === 'not-found') {
       throw new Error('Firestore database not found. Please check your Firebase project configuration.')
+    } else if (error.message && error.message.includes('timed out')) {
+      // Timeout error - most likely security rules issue
+      throw error
     } else if (error.message) {
       throw new Error(error.message)
     } else {
-      throw new Error('Failed to submit application. Please check the browser console and Network tab for details.')
+      throw new Error('Failed to submit application. Please check the browser console and Network tab for details. Look for failed requests to firestore.googleapis.com in the Network tab.')
     }
   }
 }
