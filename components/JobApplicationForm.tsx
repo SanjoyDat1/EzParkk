@@ -81,6 +81,13 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
       }
 
       // Submit application to Firestore
+      // Add a safety timeout to ensure loading state always resets
+      const submissionTimeout = setTimeout(() => {
+        console.error('⚠️ Firestore submission taking too long - resetting loading state')
+        setLoading(false)
+        setError('Submission is taking longer than expected. This usually means Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console. The request may still be processing in the background.')
+      }, 35000) // 35 seconds (slightly longer than the 30s timeout in firestore.ts)
+      
       try {
         console.log('Submitting application to Firestore...')
         console.log('Application data:', {
@@ -107,7 +114,10 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
           heardAboutUs: formData.heardAboutUs || '',
         })
         
-        console.log('Application submitted successfully with ID:', applicationId)
+        // Clear the safety timeout since we succeeded
+        clearTimeout(submissionTimeout)
+        
+        console.log('✅ Application submitted successfully with ID:', applicationId)
         
         // Immediately reset loading state after successful submission
         setLoading(false)
@@ -146,14 +156,28 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
           }, 2000)
         }
       } catch (submitError: any) {
-        console.error('Application submission error:', submitError)
+        // Clear the safety timeout since we're handling the error
+        clearTimeout(submissionTimeout)
+        
+        console.error('❌ Application submission error:', submitError)
         console.error('Error code:', submitError.code)
         console.error('Error message:', submitError.message)
+        console.error('Full error:', submitError)
         
         // If you see a permission error, check the Network tab for failed requests to firestore.googleapis.com
         // This usually indicates Firestore security rules need to be updated
         
-        setError(submitError.message || 'Failed to submit application. Please try again.')
+        // Create a user-friendly error message
+        let errorMessage = submitError.message || 'Failed to submit application. Please try again.'
+        
+        // Add specific guidance for common errors
+        if (errorMessage.includes('Permission denied') || errorMessage.includes('permission-denied')) {
+          errorMessage = 'Permission denied: Your Firestore security rules are blocking this write. Please check Firebase Console → Firestore Database → Rules and ensure the "jobApplications" collection allows writes. See FIREBASE_SETUP.md for the correct rules.'
+        } else if (errorMessage.includes('timed out') || errorMessage.includes('timeout')) {
+          errorMessage = 'Request timed out: Firestore is not responding. This usually means your Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console.'
+        }
+        
+        setError(errorMessage)
         setLoading(false)
         return
       }
@@ -503,10 +527,18 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-center gap-3"
+            className="bg-red-500/10 border-2 border-red-500/70 rounded-lg p-4 flex items-start gap-3"
           >
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <p className="text-red-400 text-sm">{error}</p>
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-red-400 text-sm font-medium mb-1">Submission Failed</p>
+              <p className="text-red-300 text-sm">{error}</p>
+              {(error.includes('Firestore') || error.includes('Permission') || error.includes('rules') || error.includes('timed out')) ? (
+                <p className="text-red-200 text-xs mt-2">
+                  💡 <strong>Quick Fix:</strong> Go to Firebase Console → Firestore Database → Rules and ensure the "jobApplications" collection has: <code className="bg-red-900/30 px-1 rounded">allow create: if true;</code> (for testing)
+                </p>
+              ) : null}
+            </div>
           </motion.div>
         )}
 
