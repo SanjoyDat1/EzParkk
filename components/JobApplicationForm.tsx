@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Send, CheckCircle, AlertCircle, Loader2, X, FileText, Upload } from 'lucide-react'
 import { submitJobApplication, JobApplication, uploadResume } from '@/lib/firestore'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface JobApplicationFormProps {
   roleId: string
@@ -14,6 +15,7 @@ interface JobApplicationFormProps {
 }
 
 export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: JobApplicationFormProps) {
+  const router = useRouter()
   const [formData, setFormData] = useState<Partial<JobApplication>>({
     name: '',
     email: '',
@@ -33,6 +35,17 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
   const [error, setError] = useState<string | null>(null)
   const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [resumeFileName, setResumeFileName] = useState<string>('')
+
+  // Optional: Auto-redirect after successful submission (after 3 seconds)
+  useEffect(() => {
+    if (submitted) {
+      const redirectTimer = setTimeout(() => {
+        // Uncomment the line below if you want to auto-redirect to careers page
+        // router.push('/careers')
+      }, 3000)
+      return () => clearTimeout(redirectTimer)
+    }
+  }, [submitted, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,6 +108,43 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
         })
         
         console.log('Application submitted successfully with ID:', applicationId)
+        
+        // Immediately reset loading state after successful submission
+        setLoading(false)
+        
+        // Clear form data
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          role: roleId,
+          coverLetter: '',
+          linkedIn: '',
+          portfolio: '',
+          instagram: '',
+          tiktok: '',
+          location: '',
+          availability: '',
+          heardAboutUs: '',
+        })
+        setResumeFile(null)
+        setResumeFileName('')
+        
+        // Reset file input
+        const fileInput = document.getElementById('resume') as HTMLInputElement
+        if (fileInput) {
+          fileInput.value = ''
+        }
+        
+        // Set success state - this will trigger the success view
+        setSubmitted(true)
+        
+        // Optional: Call onSuccess callback if provided
+        if (onSuccess) {
+          setTimeout(() => {
+            onSuccess()
+          }, 2000)
+        }
       } catch (submitError: any) {
         console.error('Application submission error:', submitError)
         console.error('Error code:', submitError.code)
@@ -107,41 +157,9 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
         setLoading(false)
         return
       }
-
-      // Success - reset form
-      setSubmitted(true)
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        role: roleId,
-        coverLetter: '',
-        linkedIn: '',
-        portfolio: '',
-        instagram: '',
-        tiktok: '',
-        location: '',
-        availability: '',
-        heardAboutUs: '',
-      })
-      setResumeFile(null)
-      setResumeFileName('')
-      
-      // Reset file input
-      const fileInput = document.getElementById('resume') as HTMLInputElement
-      if (fileInput) {
-        fileInput.value = ''
-      }
-
-      if (onSuccess) {
-        setTimeout(() => {
-          onSuccess()
-        }, 3000)
-      }
     } catch (err: any) {
       console.error('Unexpected error:', err)
       setError(err.message || 'An unexpected error occurred. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
