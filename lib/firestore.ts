@@ -139,6 +139,11 @@ export async function uploadResume(file: File, applicantEmail: string): Promise<
 
 export async function submitJobApplication(data: JobApplication): Promise<string> {
   try {
+    // Validate Firestore is initialized
+    if (!db) {
+      throw new Error('Firestore is not initialized. Please check your Firebase configuration.')
+    }
+
     // Validate required fields
     if (!data.name || !data.email || !data.role || !data.coverLetter) {
       throw new Error('Missing required fields. Please fill in all required information.')
@@ -150,37 +155,68 @@ export async function submitJobApplication(data: JobApplication): Promise<string
       throw new Error('Invalid email address. Please enter a valid email.')
     }
 
-    // Add document with timestamp
-    const docRef = await addDoc(collection(db, 'jobApplications'), {
-      name: data.name,
-      email: data.email,
-      phone: data.phone || '',
-      role: data.role,
-      resume: data.resume || '',
-      coverLetter: data.coverLetter,
-      linkedIn: data.linkedIn || '',
-      portfolio: data.portfolio || '',
-      instagram: data.instagram || '',
-      tiktok: data.tiktok || '',
-      location: data.location || '',
-      availability: data.availability || '',
-      heardAboutUs: data.heardAboutUs || '',
+    // Sanitize data - ensure no undefined values (Firestore doesn't accept undefined, use null or empty string)
+    const sanitizedData = {
+      name: String(data.name || '').trim(),
+      email: String(data.email || '').trim(),
+      phone: data.phone ? String(data.phone).trim() : '',
+      role: String(data.role || '').trim(),
+      resume: data.resume ? String(data.resume).trim() : '',
+      coverLetter: String(data.coverLetter || '').trim(),
+      linkedIn: data.linkedIn ? String(data.linkedIn).trim() : '',
+      portfolio: data.portfolio ? String(data.portfolio).trim() : '',
+      instagram: data.instagram ? String(data.instagram).trim() : '',
+      tiktok: data.tiktok ? String(data.tiktok).trim() : '',
+      location: data.location ? String(data.location).trim() : '',
+      availability: data.availability ? String(data.availability).trim() : '',
+      heardAboutUs: data.heardAboutUs ? String(data.heardAboutUs).trim() : '',
       createdAt: serverTimestamp(),
+    }
+
+    // Validate sanitized required fields again
+    if (!sanitizedData.name || !sanitizedData.email || !sanitizedData.role || !sanitizedData.coverLetter) {
+      throw new Error('Required fields are empty after sanitization.')
+    }
+
+    console.log('Submitting to Firestore collection "jobApplications" with data:', {
+      name: sanitizedData.name,
+      email: sanitizedData.email,
+      role: sanitizedData.role,
+      hasResume: !!sanitizedData.resume,
+      coverLetterLength: sanitizedData.coverLetter.length,
     })
 
+    // Add document with timestamp
+    // NOTE: If this fails, check the Network tab for a failed request to firestore.googleapis.com
+    // This usually indicates a Permissions/Rules issue in Firebase Console
+    const docRef = await addDoc(collection(db, 'jobApplications'), sanitizedData)
+
+    console.log('Successfully added document with ID:', docRef.id)
     return docRef.id
   } catch (error: any) {
-    console.error('Error submitting job application:', error)
+    // Log detailed error information for debugging
+    console.error('Error submitting job application to Firestore:', error)
+    console.error('Error code:', error.code)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
     
-    // Provide more specific error messages
+    // Check Network tab for failed requests to firestore.googleapis.com if you see permission errors
+    
+    // Provide more specific error messages based on Firestore error codes
     if (error.code === 'permission-denied') {
-      throw new Error('Permission denied. Please check Firestore security rules.')
+      throw new Error('Permission denied. Please check Firestore security rules in Firebase Console. The "jobApplications" collection must allow writes.')
     } else if (error.code === 'unavailable') {
-      throw new Error('Service temporarily unavailable. Please try again in a moment.')
+      throw new Error('Firestore service temporarily unavailable. Please try again in a moment.')
+    } else if (error.code === 'failed-precondition') {
+      throw new Error('Firestore operation failed due to a precondition. Please check your Firestore rules.')
+    } else if (error.code === 'invalid-argument') {
+      throw new Error('Invalid data format. Please check all fields are properly filled.')
+    } else if (error.code === 'not-found') {
+      throw new Error('Firestore database not found. Please check your Firebase project configuration.')
     } else if (error.message) {
       throw new Error(error.message)
     } else {
-      throw new Error('Failed to submit application. Please try again.')
+      throw new Error('Failed to submit application. Please check the browser console and Network tab for details.')
     }
   }
 }

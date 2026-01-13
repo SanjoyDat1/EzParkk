@@ -70,7 +70,15 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
       // Submit application to Firestore
       try {
         console.log('Submitting application to Firestore...')
-        await submitJobApplication({
+        console.log('Application data:', {
+          name: formData.name,
+          email: formData.email,
+          role: roleId,
+          hasResume: !!resumeUrl,
+          resumeUrlLength: resumeUrl.length,
+        })
+        
+        const applicationId = await submitJobApplication({
           name: formData.name!,
           email: formData.email!,
           phone: formData.phone || '',
@@ -85,9 +93,16 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
           availability: formData.availability || '',
           heardAboutUs: formData.heardAboutUs || '',
         })
-        console.log('Application submitted successfully')
+        
+        console.log('Application submitted successfully with ID:', applicationId)
       } catch (submitError: any) {
         console.error('Application submission error:', submitError)
+        console.error('Error code:', submitError.code)
+        console.error('Error message:', submitError.message)
+        
+        // If you see a permission error, check the Network tab for failed requests to firestore.googleapis.com
+        // This usually indicates Firestore security rules need to be updated
+        
         setError(submitError.message || 'Failed to submit application. Please try again.')
         setLoading(false)
         return
