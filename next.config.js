@@ -14,14 +14,18 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
+            // VERY PERMISSIVE CSP for Firebase - allows all necessary Firebase operations
             value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://apis.google.com",
-              "connect-src 'self' https://firestore.googleapis.com https://firebasestorage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.googleapis.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' blob: data: https:",
-              "font-src 'self' data:",
-              "frame-src 'self' https://*.google.com",
+              "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http: data: blob:",
+              "connect-src 'self' https: http: ws: wss:",
+              "style-src 'self' 'unsafe-inline' https:",
+              "img-src 'self' blob: data: https: http:",
+              "font-src 'self' data: https:",
+              "frame-src 'self' https: http:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
             ].join('; '),
           },
         ],

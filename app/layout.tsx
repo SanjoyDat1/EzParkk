@@ -86,6 +86,11 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${oswald.variable}`}>
       <head>
         <link rel="canonical" href="https://ezparkk.com" />
+        {/* CSP Meta Tag - Fallback if headers don't work */}
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http: data: blob:; connect-src 'self' https: http: ws: wss:; style-src 'self' 'unsafe-inline' https:; img-src 'self' blob: data: https: http:; font-src 'self' data: https:; frame-src 'self' https: http:;"
+        />
       </head>
       <body className="font-body bg-dark-bg text-white antialiased">
         <Script
