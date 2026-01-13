@@ -83,23 +83,43 @@ service cloud.firestore {
 
 4. **Set up Firebase Storage Security Rules** (for resume uploads):
    - Go to **Storage** → **Rules** in Firebase Console
-   - Add these rules:
+   - Add these rules (IMPORTANT: These rules allow uploads but restrict reads for security):
 
 ```javascript
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /resumes/{fileName} {
-      // Allow anyone to upload resumes (with size limit)
+      // Allow anyone to upload resumes (with size and type validation)
       allow write: if request.resource.size < 5 * 1024 * 1024 // 5MB limit
-                    && request.resource.contentType.matches('application/pdf|application/msword|application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+                    && (request.resource.contentType.matches('application/pdf')
+                        || request.resource.contentType.matches('application/msword')
+                        || request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document'));
       
-      // Allow reads: only authenticated users (optional, adjust as needed)
-      allow read: if false; // Disable reads from client for security
+      // Disable reads from client for security (only admins can read via Firebase Console)
+      allow read: if false;
+    }
+    
+    // Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
     }
   }
 }
 ```
+
+   **Note:** If you're getting upload errors, you can temporarily use test mode rules for development:
+   ```javascript
+   rules_version = '2';
+   service firebase.storage {
+     match /b/{bucket}/o {
+       match /{allPaths=**} {
+         allow read, write: if request.resource.size < 5 * 1024 * 1024;
+       }
+     }
+   }
+   ```
+   ⚠️ **Warning:** Test mode allows anyone to upload/read files. Only use for testing and switch back to production rules before going live!
 
 5. For production, consider adding authentication or additional validation
 6. Click **Publish** to save both Firestore and Storage rules
@@ -124,7 +144,17 @@ service firebase.storage {
 
 ### "Permission denied" error
 - Check your Firestore security rules
-- Make sure the rules allow writes to the `waitlist` collection
+- Make sure the rules allow writes to the `waitlist` and `jobApplications` collections
+- Check your Firebase Storage rules - they must allow writes to the `resumes/` path
+- Make sure Storage is enabled in your Firebase project
+
+### "Failed to upload resume" error
+- Verify Firebase Storage is enabled in your Firebase Console
+- Check Storage security rules allow writes to `resumes/{fileName}` path
+- Ensure file size is under 5MB
+- Ensure file type is PDF, DOC, or DOCX
+- Check that `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` is set correctly in `.env.local`
+- Verify the Storage bucket location matches your Firestore location
 
 ### "This email is already on the waitlist!"
 - This is expected behavior - the form prevents duplicate email submissions

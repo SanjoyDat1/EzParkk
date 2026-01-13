@@ -40,34 +40,60 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
     setLoading(true)
 
     try {
-      let resumeUrl = ''
-      
-      // Upload resume if provided
-      if (resumeFile) {
-        try {
-          resumeUrl = await uploadResume(resumeFile, formData.email!)
-        } catch (uploadError: any) {
-          setError(uploadError.message || 'Failed to upload resume. Please try again.')
-          setLoading(false)
-          return
-        }
+      // Validate required fields before proceeding
+      if (!formData.name || !formData.email || !formData.coverLetter) {
+        setError('Please fill in all required fields (Name, Email, and Cover Letter).')
+        setLoading(false)
+        return
       }
 
-      await submitJobApplication({
-        name: formData.name!,
-        email: formData.email!,
-        phone: formData.phone || '',
-        role: roleId,
-        resume: resumeUrl,
-        coverLetter: formData.coverLetter!,
-        linkedIn: formData.linkedIn || '',
-        portfolio: formData.portfolio || '',
-        instagram: formData.instagram || '',
-        tiktok: formData.tiktok || '',
-        location: formData.location || '',
-        availability: formData.availability || '',
-        heardAboutUs: formData.heardAboutUs || '',
-      })
+      if (!resumeFile) {
+        setError('Please upload your resume.')
+        setLoading(false)
+        return
+      }
+
+      let resumeUrl = ''
+      
+      // Upload resume - this is required
+      try {
+        console.log('Starting resume upload...', { fileName: resumeFile.name, size: resumeFile.size, type: resumeFile.type })
+        resumeUrl = await uploadResume(resumeFile, formData.email!)
+        console.log('Resume uploaded successfully:', resumeUrl)
+      } catch (uploadError: any) {
+        console.error('Resume upload error:', uploadError)
+        setError(uploadError.message || 'Failed to upload resume. Please check your file and try again.')
+        setLoading(false)
+        return
+      }
+
+      // Submit application to Firestore
+      try {
+        console.log('Submitting application to Firestore...')
+        await submitJobApplication({
+          name: formData.name!,
+          email: formData.email!,
+          phone: formData.phone || '',
+          role: roleId,
+          resume: resumeUrl,
+          coverLetter: formData.coverLetter!,
+          linkedIn: formData.linkedIn || '',
+          portfolio: formData.portfolio || '',
+          instagram: formData.instagram || '',
+          tiktok: formData.tiktok || '',
+          location: formData.location || '',
+          availability: formData.availability || '',
+          heardAboutUs: formData.heardAboutUs || '',
+        })
+        console.log('Application submitted successfully')
+      } catch (submitError: any) {
+        console.error('Application submission error:', submitError)
+        setError(submitError.message || 'Failed to submit application. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      // Success - reset form
       setSubmitted(true)
       setFormData({
         name: '',
@@ -85,14 +111,21 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
       })
       setResumeFile(null)
       setResumeFileName('')
+      
+      // Reset file input
+      const fileInput = document.getElementById('resume') as HTMLInputElement
+      if (fileInput) {
+        fileInput.value = ''
+      }
+
       if (onSuccess) {
         setTimeout(() => {
           onSuccess()
         }, 3000)
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to submit application. Please try again.')
-      console.error('Application error:', err)
+      console.error('Unexpected error:', err)
+      setError(err.message || 'An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
