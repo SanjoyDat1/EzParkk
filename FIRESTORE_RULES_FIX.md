@@ -26,8 +26,10 @@ service cloud.firestore {
     }
     
     match /jobApplications/{document=**} {
-      // Allow reads: only authenticated users (optional)
-      allow read: if false;
+      // IMPORTANT: allow read: if false blocks you from seeing data in Firebase Console
+      // For development/testing, you can temporarily use: allow read: if true;
+      // For production, keep it as false for security
+      allow read: if false;  // Blocks client reads, but you can still view in Firebase Console
       
       // ✅ THIS IS THE KEY RULE - Allows job applications to be created
       allow create: if request.resource.data.keys().hasAll(['name', 'email', 'role', 'coverLetter'])
@@ -70,9 +72,20 @@ match /jobApplications/{document=**} {
 ## 🔍 How to Verify It's Working
 
 1. Submit a test application
-2. Go to Firebase Console → Firestore Database → Data
+2. Go to Firebase Console → Firestore Database → Data tab
 3. You should see a `jobApplications` collection
 4. Click on it to see your submitted applications
+
+### ⚠️ Can't See Data in Firebase Console?
+
+If you can't see the data in Firebase Console:
+1. **Refresh the page** - Sometimes there's a delay
+2. **Check the collection name** - Make sure it's exactly `jobApplications` (case-sensitive)
+3. **Check if data was actually saved** - Look at the browser console for the success message with document ID
+4. **Verify rules are published** - Make sure you clicked "Publish" after editing rules
+5. **Check the correct project** - Make sure you're looking at the right Firebase project (ezparkk-e4d3b)
+
+**Note:** The `allow read: if false` rule only blocks client-side reads. You can still view data in Firebase Console as an admin.
 
 ## ❌ Still Not Working?
 

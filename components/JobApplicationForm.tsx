@@ -52,139 +52,134 @@ export default function JobApplicationForm({ roleId, roleTitle, onSuccess }: Job
     setError(null)
     setLoading(true)
 
+    // MANDATORY: Use finally block to guarantee loading state resets
     try {
       // Validate required fields before proceeding
       if (!formData.name || !formData.email || !formData.coverLetter) {
         setError('Please fill in all required fields (Name, Email, and Cover Letter).')
-        setLoading(false)
         return
       }
 
       if (!resumeFile) {
         setError('Please upload your resume.')
-        setLoading(false)
         return
       }
 
       let resumeUrl = ''
       
       // Upload resume - this is required
-      try {
-        console.log('Starting resume upload...', { fileName: resumeFile.name, size: resumeFile.size, type: resumeFile.type })
-        resumeUrl = await uploadResume(resumeFile, formData.email!)
-        console.log('Resume uploaded successfully:', resumeUrl)
-      } catch (uploadError: any) {
-        console.error('Resume upload error:', uploadError)
-        setError(uploadError.message || 'Failed to upload resume. Please check your file and try again.')
-        setLoading(false)
-        return
-      }
+      console.log('Starting resume upload...', { fileName: resumeFile.name, size: resumeFile.size, type: resumeFile.type })
+      resumeUrl = await uploadResume(resumeFile, formData.email!)
+      console.log('Resume uploaded successfully:', resumeUrl)
 
       // Submit application to Firestore
-      // Add a safety timeout to ensure loading state always resets
-      const submissionTimeout = setTimeout(() => {
-        console.error('⚠️ Firestore submission taking too long - resetting loading state')
-        setLoading(false)
-        setError('Submission is taking longer than expected. This usually means Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console. The request may still be processing in the background.')
-      }, 35000) // 35 seconds (slightly longer than the 30s timeout in firestore.ts)
+      console.log('Submitting application to Firestore...')
+      console.log('Application data:', {
+        name: formData.name,
+        email: formData.email,
+        role: roleId,
+        hasResume: !!resumeUrl,
+        resumeUrlLength: resumeUrl.length,
+      })
       
-      try {
-        console.log('Submitting application to Firestore...')
-        console.log('Application data:', {
-          name: formData.name,
-          email: formData.email,
-          role: roleId,
-          hasResume: !!resumeUrl,
-          resumeUrlLength: resumeUrl.length,
-        })
-        
-        const applicationId = await submitJobApplication({
-          name: formData.name!,
-          email: formData.email!,
-          phone: formData.phone || '',
-          role: roleId,
-          resume: resumeUrl,
-          coverLetter: formData.coverLetter!,
-          linkedIn: formData.linkedIn || '',
-          portfolio: formData.portfolio || '',
-          instagram: formData.instagram || '',
-          tiktok: formData.tiktok || '',
-          location: formData.location || '',
-          availability: formData.availability || '',
-          heardAboutUs: formData.heardAboutUs || '',
-        })
-        
-        // Clear the safety timeout since we succeeded
-        clearTimeout(submissionTimeout)
-        
-        console.log('✅ Application submitted successfully with ID:', applicationId)
-        
-        // Immediately reset loading state after successful submission
-        setLoading(false)
-        
-        // Clear form data
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          role: roleId,
-          coverLetter: '',
-          linkedIn: '',
-          portfolio: '',
-          instagram: '',
-          tiktok: '',
-          location: '',
-          availability: '',
-          heardAboutUs: '',
-        })
-        setResumeFile(null)
-        setResumeFileName('')
-        
-        // Reset file input
-        const fileInput = document.getElementById('resume') as HTMLInputElement
-        if (fileInput) {
-          fileInput.value = ''
-        }
-        
-        // Set success state - this will trigger the success view
-        setSubmitted(true)
-        
-        // Optional: Call onSuccess callback if provided
-        if (onSuccess) {
-          setTimeout(() => {
-            onSuccess()
-          }, 2000)
-        }
-      } catch (submitError: any) {
-        // Clear the safety timeout since we're handling the error
-        clearTimeout(submissionTimeout)
-        
-        console.error('❌ Application submission error:', submitError)
-        console.error('Error code:', submitError.code)
-        console.error('Error message:', submitError.message)
-        console.error('Full error:', submitError)
-        
-        // If you see a permission error, check the Network tab for failed requests to firestore.googleapis.com
-        // This usually indicates Firestore security rules need to be updated
-        
-        // Create a user-friendly error message
-        let errorMessage = submitError.message || 'Failed to submit application. Please try again.'
-        
-        // Add specific guidance for common errors
-        if (errorMessage.includes('Permission denied') || errorMessage.includes('permission-denied')) {
-          errorMessage = 'Permission denied: Your Firestore security rules are blocking this write. Please check Firebase Console → Firestore Database → Rules and ensure the "jobApplications" collection allows writes. See FIREBASE_SETUP.md for the correct rules.'
-        } else if (errorMessage.includes('timed out') || errorMessage.includes('timeout')) {
-          errorMessage = 'Request timed out: Firestore is not responding. This usually means your Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console.'
-        }
-        
-        setError(errorMessage)
-        setLoading(false)
-        return
+      const applicationId = await submitJobApplication({
+        name: formData.name!,
+        email: formData.email!,
+        phone: formData.phone || '',
+        role: roleId,
+        resume: resumeUrl,
+        coverLetter: formData.coverLetter!,
+        linkedIn: formData.linkedIn || '',
+        portfolio: formData.portfolio || '',
+        instagram: formData.instagram || '',
+        tiktok: formData.tiktok || '',
+        location: formData.location || '',
+        availability: formData.availability || '',
+        heardAboutUs: formData.heardAboutUs || '',
+      })
+      
+      console.log('✅ Application submitted successfully with ID:', applicationId)
+      
+      // HARD SUCCESS ALERT - Immediate user feedback
+      alert('Application Received! We will be in touch.')
+      
+      // Clear form data immediately after success
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        role: roleId,
+        coverLetter: '',
+        linkedIn: '',
+        portfolio: '',
+        instagram: '',
+        tiktok: '',
+        location: '',
+        availability: '',
+        heardAboutUs: '',
+      })
+      setResumeFile(null)
+      setResumeFileName('')
+      
+      // Reset file input
+      const fileInput = document.getElementById('resume') as HTMLInputElement
+      if (fileInput) {
+        fileInput.value = ''
       }
+      
+      // Set success state - this will trigger the success view
+      setSubmitted(true)
+      
+      // Router redirect with fallback
+      try {
+        // Wait a moment for the success state to render
+        setTimeout(() => {
+          try {
+            router.push('/careers')
+          } catch (routerError) {
+            console.error('Router redirect failed, using window.location:', routerError)
+            // Fallback to window.location if router fails
+            if (typeof window !== 'undefined') {
+              window.location.href = '/careers'
+            }
+          }
+        }, 2000)
+      } catch (redirectError) {
+        console.error('Redirect failed:', redirectError)
+        // Final fallback
+        if (typeof window !== 'undefined') {
+          window.location.reload()
+        }
+      }
+      
+      // Optional: Call onSuccess callback if provided
+      if (onSuccess) {
+        setTimeout(() => {
+          onSuccess()
+        }, 2000)
+      }
+      
     } catch (err: any) {
-      console.error('Unexpected error:', err)
-      setError(err.message || 'An unexpected error occurred. Please try again.')
+      console.error('❌ Application submission error:', err)
+      console.error('Error code:', err.code)
+      console.error('Error message:', err.message)
+      console.error('Full error:', err)
+      
+      // Create a user-friendly error message
+      let errorMessage = err.message || 'Failed to submit application. Please try again.'
+      
+      // Add specific guidance for common errors
+      if (errorMessage.includes('Permission denied') || errorMessage.includes('permission-denied')) {
+        errorMessage = 'Permission denied: Your Firestore security rules are blocking this write. Please check Firebase Console → Firestore Database → Rules and ensure the "jobApplications" collection allows writes. See FIREBASE_SETUP.md for the correct rules.'
+      } else if (errorMessage.includes('timed out') || errorMessage.includes('timeout')) {
+        errorMessage = 'Request timed out: Firestore is not responding. This usually means your Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console.'
+      }
+      
+      setError(errorMessage)
+    } finally {
+      // MANDATORY: Always reset loading state, even if there's a crash
       setLoading(false)
+      console.log('Loading state reset in finally block')
     }
   }
 
