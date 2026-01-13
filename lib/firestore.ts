@@ -186,24 +186,24 @@ export async function submitJobApplication(data: JobApplication): Promise<string
       coverLetterLength: sanitizedData.coverLetter.length,
     })
 
+    // Verify Firestore connection
+    console.log('Firestore db object:', db)
+    console.log('Firestore app:', db.app)
+    console.log('Collection reference:', collection(db, 'jobApplications'))
+
     // Add document with timestamp
     // NOTE: If this fails, check the Network tab for a failed request to firestore.googleapis.com
     // This usually indicates a Permissions/Rules issue in Firebase Console
     
-    // Add timeout to prevent hanging indefinitely (30 seconds)
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error('Firestore request timed out after 30 seconds. This usually means Firestore security rules are blocking the write. Please check your Firestore rules in Firebase Console.'))
-      }, 30000)
-    })
-
-    console.log('Calling addDoc...')
-    const addDocPromise = addDoc(collection(db, 'jobApplications'), sanitizedData)
+    console.log('Calling addDoc with collection "jobApplications"...')
+    const startTime = Date.now()
     
-    // Race between the addDoc and timeout
-    const docRef = await Promise.race([addDocPromise, timeoutPromise])
+    // Remove Promise.race timeout - let Firestore handle its own timeout
+    // If rules allow everything, the request should complete quickly
+    const docRef = await addDoc(collection(db, 'jobApplications'), sanitizedData)
     
-    console.log('Successfully added document with ID:', docRef.id)
+    const duration = Date.now() - startTime
+    console.log(`✅ Successfully added document with ID: ${docRef.id} (took ${duration}ms)`)
     return docRef.id
   } catch (error: any) {
     // Log detailed error information for debugging
@@ -231,8 +231,14 @@ export async function submitJobApplication(data: JobApplication): Promise<string
     } else if (error.code === 'not-found') {
       throw new Error('Firestore database not found. Please check your Firebase project configuration.')
     } else if (error.message && error.message.includes('timed out')) {
-      // Timeout error - most likely security rules issue
-      throw error
+      // Timeout error - could be network issue, rules issue, or Firestore not responding
+      console.error('⏱️ TIMEOUT - Possible causes:')
+      console.error('1. Network connectivity issue')
+      console.error('2. Firestore service is down')
+      console.error('3. Rules not published (even if they look correct)')
+      console.error('4. Firestore not initialized correctly')
+      console.error('5. Check Network tab for firestore.googleapis.com requests')
+      throw new Error('Firestore request timed out. Please check: 1) Your internet connection, 2) Firebase Console to ensure rules are published, 3) Network tab for failed requests to firestore.googleapis.com')
     } else if (error.message) {
       throw new Error(error.message)
     } else {

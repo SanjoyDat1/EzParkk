@@ -29,6 +29,13 @@ if (!getApps().length) {
 // Initialize Firestore
 export const db: Firestore = getFirestore(app)
 
+// Log Firestore initialization for debugging
+console.log('Firestore initialized:', {
+  app: app.name,
+  projectId: firebaseConfig.projectId,
+  dbType: db.type,
+})
+
 // Initialize Storage with explicit bucket configuration
 let storage: FirebaseStorage
 try {
