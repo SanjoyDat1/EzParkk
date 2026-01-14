@@ -15,3 +15,9 @@
   to = "/verify-email.html"
   status = 200
 
+# CSP headers are set in next.config.js
+# Removed CSP from netlify.toml to avoid conflicts - Next.js headers take precedence
+# [[headers]]
+#   for = "/*"
+#   [headers.values]
+#     Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https: http: data: blob:; connect-src 'self' https: http: ws: wss:; style-src 'self' 'unsafe-inline' https:; img-src 'self' blob: data: https: http:; font-src 'self' data: https:;"
