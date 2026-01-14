@@ -2,33 +2,46 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
 import { getFirestore, Firestore } from 'firebase/firestore'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
 
-// Debug logging - check environment variables
-console.log('Firebase Config Debug:', {
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  hasAuthDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  hasStorageBucket: !!process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  hasMessagingSenderId: !!process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  hasAppId: !!process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-})
-
 // Fallback project ID if environment variable is missing
 const FALLBACK_PROJECT_ID = 'ezparkk-e4d3b'
 
+// Debug logging - check environment variables BEFORE config
+console.log('Firebase Config Debug (Raw Env Vars):', {
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? process.env.NEXT_PUBLIC_FIREBASE_API_KEY.substring(0, 10) + '...' : 'NOT SET',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+})
+
+// IMPORTANT: Next.js only exposes NEXT_PUBLIC_* env vars to the browser
+// If these are undefined, you need to:
+// 1. Restart the dev server (npm run dev)
+// 2. Clear .next cache (rm -rf .next)
+// 3. Check .env.local file exists and has correct variable names
+
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '', // Firebase might work without this for some operations
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID) + '.firebaseapp.com',
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID) + '.firebasestorage.app',
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
 }
 
-// Validate and warn if using fallback
+// Validate and warn if using fallbacks
 if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
   console.warn('⚠️ NEXT_PUBLIC_FIREBASE_PROJECT_ID not found in environment variables!')
   console.warn(`⚠️ Using fallback project ID: ${FALLBACK_PROJECT_ID}`)
   console.warn('⚠️ Please set NEXT_PUBLIC_FIREBASE_PROJECT_ID in your .env.local file')
+}
+
+if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  console.warn('⚠️ NEXT_PUBLIC_FIREBASE_API_KEY not found in environment variables!')
+  console.warn('⚠️ This may cause Firebase authentication errors')
+  console.warn('⚠️ Solution: Restart your dev server (npm run dev) after setting env vars')
+  console.warn('⚠️ Or clear cache: rm -rf .next && npm run dev')
 }
 
 console.log('Final Firebase Config:', {
@@ -38,6 +51,7 @@ console.log('Final Firebase Config:', {
   hasApiKey: !!firebaseConfig.apiKey,
   hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
   hasAppId: !!firebaseConfig.appId,
+  apiKeyPreview: firebaseConfig.apiKey ? firebaseConfig.apiKey.substring(0, 10) + '...' : 'MISSING',
 })
 
 // Validate required Firebase config
