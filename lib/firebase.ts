@@ -2,14 +2,43 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
 import { getFirestore, Firestore } from 'firebase/firestore'
 import { getStorage, FirebaseStorage } from 'firebase/storage'
 
+// Debug logging - check environment variables
+console.log('Firebase Config Debug:', {
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  hasApiKey: !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  hasAuthDomain: !!process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  hasStorageBucket: !!process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  hasMessagingSenderId: !!process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  hasAppId: !!process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+})
+
+// Fallback project ID if environment variable is missing
+const FALLBACK_PROJECT_ID = 'ezparkk-e4d3b'
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID) + '.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID) + '.firebasestorage.app',
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
+
+// Validate and warn if using fallback
+if (!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID) {
+  console.warn('⚠️ NEXT_PUBLIC_FIREBASE_PROJECT_ID not found in environment variables!')
+  console.warn(`⚠️ Using fallback project ID: ${FALLBACK_PROJECT_ID}`)
+  console.warn('⚠️ Please set NEXT_PUBLIC_FIREBASE_PROJECT_ID in your .env.local file')
+}
+
+console.log('Final Firebase Config:', {
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+  storageBucket: firebaseConfig.storageBucket,
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasMessagingSenderId: !!firebaseConfig.messagingSenderId,
+  hasAppId: !!firebaseConfig.appId,
+})
 
 // Validate required Firebase config
 if (!firebaseConfig.storageBucket) {
